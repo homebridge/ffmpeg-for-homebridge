@@ -5,8 +5,26 @@ on: [push]
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-latest, ubuntu-latest]
+        include:
+          - os: ubuntu-latest
+            BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
+            DOCKERFILE: Dockerfile.debian
+            TARGET_OS: raspbian
+            TARGET_ARCH: armv6l
+          - os: ubuntu-latest
+            BASE_IMAGE: arm32v7/debian:stretch
+            DOCKERFILE: Dockerfile.debian
+            TARGET_OS: debian
+            TARGET_ARCH: armv7l
+          - os: ubuntu-latest
+            BASE_IMAGE: library/debian:stretch
+            DOCKERFILE: Dockerfile.debian
+            TARGET_OS: debian
+            TARGET_ARCH: x86_64
 
     steps:
     - uses: actions/checkout@v2
@@ -17,12 +35,12 @@ jobs:
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
     - name: Build Docker Image
       run: |
-        docker build -t ffmpeg-builder .
+        docker build --build-arg BASE_IMAGE=${{matrix.BASE_IMAGE}} -f ${{matrix.DOCKERFILE}} -t ffmpeg-builder .
     - name: Build static ffmpeg binary
       run: |
-        docker run -v $(pwd)/workspace:/build ffmpeg-builder
+        docker run -v $(pwd)/build:/build -e TARGET_OS=${{matrix.TARGET_OS}} ffmpeg-builder
     - name: Upload Assets
       uses: actions/upload-artifact@v1
       with:
-        name: ffmpeg
-        path: workspace/bin
+        name: ffmpeg-${{matrix.TARGET_OS}}-${{matrix.TARGET_ARCH}}
+        path: build/workspace/bin/ffmpeg

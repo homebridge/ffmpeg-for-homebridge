@@ -12,6 +12,12 @@ CFLAGS="-I${WORKSPACE}/include"
 PKG_CONFIG_PATH="${WORKSPACE}/lib/pkgconfig"
 ADDITIONAL_CONFIGURE_OPTIONS=""
 
+if [ "$TARGET_OS" = "raspbian" ]; then
+	apt-get update
+ 	apt-get install -y libraspberrypi-dev libomxil-bellagio-dev
+	EXTRA_FLAGS="--enable-omx-rpi --enable-mmal"
+fi
+
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
 if [[ -n $NUMJOBS ]]; then
@@ -296,38 +302,17 @@ if build "pkg-config"; then
 	build_done "pkg-config"
 fi
 
-if build "cmake"; then
-	download "https://cmake.org/files/v3.15/cmake-3.15.4.tar.gz" "cmake-3.15.4.tar.gz"
-	cd $PACKAGES/cmake-3.15.4  || exit
-	rm Modules/FindJava.cmake
-	perl -p -i -e "s/get_filename_component.JNIPATH/#get_filename_component(JNIPATH/g" Tests/CMakeLists.txt
-	perl -p -i -e "s/get_filename_component.JNIPATH/#get_filename_component(JNIPATH/g" Tests/CMakeLists.txt
-	execute ./configure --prefix=${WORKSPACE}
-	execute make -j $MJOBS
-	execute make install
-	build_done "cmake"
-fi
-
-if build "vid_stab"; then
-	download "https://github.com/georgmartius/vid.stab/archive/v1.1.0.tar.gz" "georgmartius-vid.stab-v1.1.0-0-g60d65da.tar.tgz"
-	cd $PACKAGES/vid.stab-1.1.0 || exit
-	execute cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX:PATH=${WORKSPACE} -DUSE_OMP=OFF -DENABLE_SHARED:bool=off .
-	execute make
-	execute make install
-	build_done "vid_stab"
-fi
-
-if build "x265"; then
-	download "https://bitbucket.org/multicoreware/x265/downloads/x265_3.2.1.tar.gz" "x265-3.2.1.tar.gz"
-	cd $PACKAGES/x265_* || exit
-	cd source || exit
-	execute cmake -DCMAKE_INSTALL_PREFIX:PATH=${WORKSPACE} -DENABLE_SHARED:bool=off .
-	execute make -j $MJOBS
-	execute make install
-	sed "s/-lx265/-lx265 -lstdc++/g" "$WORKSPACE/lib/pkgconfig/x265.pc" > "$WORKSPACE/lib/pkgconfig/x265.pc.tmp"
-	mv "$WORKSPACE/lib/pkgconfig/x265.pc.tmp" "$WORKSPACE/lib/pkgconfig/x265.pc"
-	build_done "x265"
-fi
+# if build "cmake"; then
+# 	download "https://cmake.org/files/v3.15/cmake-3.15.4.tar.gz" "cmake-3.15.4.tar.gz"
+# 	cd $PACKAGES/cmake-3.15.4  || exit
+# 	rm Modules/FindJava.cmake
+# 	perl -p -i -e "s/get_filename_component.JNIPATH/#get_filename_component(JNIPATH/g" Tests/CMakeLists.txt
+# 	perl -p -i -e "s/get_filename_component.JNIPATH/#get_filename_component(JNIPATH/g" Tests/CMakeLists.txt
+# 	execute ./configure --prefix=${WORKSPACE}
+# 	execute make -j $MJOBS
+# 	execute make install
+# 	build_done "cmake"
+# fi
 
 if build "fdk_aac"; then
 	download "https://sourceforge.net/projects/opencore-amr/files/fdk-aac/fdk-aac-2.0.0.tar.gz/download?use_mirror=gigenet" "fdk-aac-2.0.0.tar.gz"
@@ -336,17 +321,6 @@ if build "fdk_aac"; then
 	execute make -j $MJOBS
 	execute make install
 	build_done "fdk_aac"
-fi
-
-if build "av1"; then
-	download "https://aomedia.googlesource.com/aom/+archive/60a00de69ca79fe5f51dcbf862aaaa8eb50ec344.tar.gz" "av1.tar.gz" "av1"
-	cd $PACKAGES/av1 || exit
-	mkdir -p $PACKAGES/aom_build
-	cd $PACKAGES/aom_build
-	execute cmake -DENABLE_TESTS=0 -DCMAKE_INSTALL_PREFIX:PATH=${WORKSPACE} $PACKAGES/av1
-	execute make -j $MJOBS
-	execute make install
-	build_done "av1"
 fi
 
 if build "zlib"; then
@@ -389,19 +363,20 @@ cd $PACKAGES/ffmpeg-47773f7/ || exit
 	--enable-pthreads \
 	--enable-libvpx \
 	--enable-libmp3lame \
-    --enable-libopus \
+  --enable-libopus \
 	--enable-libtheora \
 	--enable-libvorbis \
 	--enable-libx264 \
-	--enable-libx265 \
 	--enable-runtime-cpudetect \
 	--enable-libfdk-aac \
 	--enable-avfilter \
 	--enable-libopencore_amrwb \
 	--enable-libopencore_amrnb \
 	--enable-filters \
-	--enable-libvidstab \
-	--enable-libaom
+	--enable-decoder=h264 \
+	--enable-network \
+	--enable-protocol=tcp \
+	--enable-demuxer=rtsp $EXTRA_FLAGS
 
 execute make -j $MJOBS
 execute make install
