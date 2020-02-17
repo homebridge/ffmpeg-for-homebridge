@@ -8,19 +8,22 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-latest, ubuntu-latest]
+        name: [raspbian-armv6l, debian-armv6l, debian-x86_64]
         include:
-          - os: ubuntu-latest
+          - name: raspbian-armv6l
+            os: ubuntu-latest
             BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: raspbian
             TARGET_ARCH: armv6l
-          - os: ubuntu-latest
+          - name: debian-armv6l
+            os: ubuntu-latest
             BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: debian
             TARGET_ARCH: armv6l
-          - os: ubuntu-latest
+          - name: debian-x86_64
+            os: ubuntu-latest
             BASE_IMAGE: library/debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: debian
@@ -28,18 +31,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup Dependencies for ${{ matrix.TARGET_OS }} ${{ matrix.TARGET_ARCH }}
+    - name: Setup Dependencies
       run: |
         sudo apt-get update
         sudo apt-get --yes --no-install-recommends install binfmt-support qemu-user-static
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
-    - name: Build Docker Image for ${{ matrix.TARGET_OS }} ${{ matrix.TARGET_ARCH }}
+    - name: Build Docker Image 
       run: |
         docker build --build-arg BASE_IMAGE=${{ matrix.BASE_IMAGE }} -f ${{ matrix.DOCKERFILE }} -t ffmpeg-builder .
     - name: Build static ffmpeg binary
       run: |
         docker run -v $(pwd)/build:/build -e TARGET_OS=${{ matrix.TARGET_OS }} ffmpeg-builder
-    - name: Upload Assets for ${{ matrix.TARGET_OS }} ${{ matrix.TARGET_ARCH }}
+    - name: Upload Assets
       uses: actions/upload-artifact@v1
       with:
         name: ffmpeg-${{ matrix.TARGET_OS }}-${{ matrix.TARGET_ARCH }}
