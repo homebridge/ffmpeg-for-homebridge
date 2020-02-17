@@ -22,7 +22,7 @@ jobs:
       run: |
         docker run -v $(pwd)/workspace:/build ffmpeg-builder
     - name: Upload Assets
-    - uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v1
       with:
         name: ffmpeg
         path: workspace/bin
