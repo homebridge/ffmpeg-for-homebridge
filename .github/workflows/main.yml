@@ -21,7 +21,6 @@ jobs:
             TARGET_OS: debian
             TARGET_ARCH: armv6l
           - os: ubuntu-latest
-
             BASE_IMAGE: library/debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: debian
@@ -29,19 +28,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup Dependencies for ${{matrix.TARGET_OS}} ${{matrix.TARGET_ARCH}}
+    - name: Setup Dependencies for ${{ matrix.TARGET_OS }} ${{ matrix.TARGET_ARCH }}
       run: |
         sudo apt-get update
         sudo apt-get --yes --no-install-recommends install binfmt-support qemu-user-static
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
-    - name: Build Docker Image for ${{matrix.TARGET_OS}} ${{matrix.TARGET_ARCH}}
+    - name: Build Docker Image for ${{ matrix.TARGET_OS }} ${{ matrix.TARGET_ARCH }}
       run: |
-        docker build --build-arg BASE_IMAGE=${{matrix.BASE_IMAGE}} -f ${{matrix.DOCKERFILE}} -t ffmpeg-builder .
+        docker build --build-arg BASE_IMAGE=${{ matrix.BASE_IMAGE }} -f ${{ matrix.DOCKERFILE }} -t ffmpeg-builder .
     - name: Build static ffmpeg binary
       run: |
-        docker run -v $(pwd)/build:/build -e TARGET_OS=${{matrix.TARGET_OS}} ffmpeg-builder
-    - name: Upload Assets for ${{matrix.TARGET_OS}} ${{matrix.TARGET_ARCH}}
+        docker run -v $(pwd)/build:/build -e TARGET_OS=${{ matrix.TARGET_OS }} ffmpeg-builder
+    - name: Upload Assets for ${{ matrix.TARGET_OS }} ${{ matrix.TARGET_ARCH }}
       uses: actions/upload-artifact@v1
       with:
-        name: ffmpeg-${{matrix.TARGET_OS}}-${{matrix.TARGET_ARCH}}
+        name: ffmpeg-${{ matrix.TARGET_OS }}-${{ matrix.TARGET_ARCH }}
         path: build/workspace/bin/ffmpeg
