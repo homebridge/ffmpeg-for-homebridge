@@ -8,16 +8,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        name: [raspbian-armv6l, debian-armv7l, debian-x86_64]
+        name: [raspbian-armv6l, debian-armv6l, debian-x86_64]
         include:
           - name: raspbian-armv6l
             os: ubuntu-latest
             BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: raspbian
-          - name: debian-armv7l
+          - name: debian-armv6l
             os: ubuntu-latest
-            BASE_IMAGE: arm32v7/debian:stretch
+            BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: debian
           - name: debian-x86_64
