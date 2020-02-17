@@ -10,6 +10,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build Docker
+    - name: Build Docker Image
       run: |
-        docker build -t ffmpeg-builder
+        docker build -t ffmpeg-builder .
