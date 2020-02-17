@@ -10,9 +10,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build Docker Image
+    - name: Setup Dependencies
       run: |
         sudo apt-get update
         sudo apt-get --yes --no-install-recommends install binfmt-support qemu-user-static
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
+    - name: Build Docker Image
+      run: |
         docker build -t ffmpeg-builder .
+    - name: Build static ffmpeg binary
+      run: |
+        docker run -v $(pwd)/workspace:/build ffmpeg-builder
+    - name: Upload Assets
+    - uses: actions/upload-artifact@v1
+      with:
+        name: ffmpeg
+        path: workspace/bin
