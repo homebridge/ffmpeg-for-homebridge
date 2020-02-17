@@ -56,6 +56,9 @@ jobs:
       run: |
         mkdir -p build
         docker run -v $(pwd)/build:/build -e TARGET_OS=${{ matrix.TARGET_OS }} ffmpeg-builder
+    - name: Fix permissions
+      run: |
+        sudo chown -R $USER:$USER build
     - name: Upload Assets
       uses: actions/upload-artifact@v1
       with:
