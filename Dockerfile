@@ -4,4 +4,9 @@ RUN  apt-get update && apt-get install -y build-essential curl g++
 
 COPY build-ffmpeg /
 
-RUN /build-ffmpeg --build
+ENV SKIPINSTALL=yes VERBOSE=yes
+
+VOLUME /build
+WORKDIR /build
+
+CMD /build-ffmpeg --build
