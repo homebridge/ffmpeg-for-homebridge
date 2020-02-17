@@ -8,26 +8,42 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        name: [raspbian-armv6l, debian-armv6l, debian-x86_64]
+        name: [raspbian-armv6l, debian-x86_64, debian-armv7l, alpine-x86_64, alpine-armv6l]
         include:
           - name: raspbian-armv6l
             os: ubuntu-latest
             BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: raspbian
-          - name: debian-armv6l
-            os: ubuntu-latest
-            BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
-            DOCKERFILE: Dockerfile.debian
-            TARGET_OS: debian
           - name: debian-x86_64
             os: ubuntu-latest
             BASE_IMAGE: library/debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: debian
+          - name: debian-armv7l
+            os: ubuntu-latest
+            BASE_IMAGE: arm32v7/debian:stretch
+            DOCKERFILE: Dockerfile.debian
+            TARGET_OS: debian
+          - name: alpine-x86_64
+            os: ubuntu-latest
+            BASE_IMAGE: library/alpine:3.11.3
+            DOCKERFILE: Dockerfile.alpine
+            TARGET_OS: alpine
+          - name: alpine-armv6l
+            os: ubuntu-latest
+            BASE_IMAGE: arm32v6/alpine:3.11.3
+            DOCKERFILE: Dockerfile.alpine
+            TARGET_OS: alpine
 
     steps:
     - uses: actions/checkout@v2
+    - name: Cache Workspace
+      id: cache
+      uses: actions/cache@v1
+      with:
+        path: build
+        key: ${{ matrix.name }}-cache
     - name: Setup Dependencies
       run: |
         sudo apt-get update
@@ -38,6 +54,7 @@ jobs:
         docker build --build-arg BASE_IMAGE=${{ matrix.BASE_IMAGE }} -f ${{ matrix.DOCKERFILE }} -t ffmpeg-builder .
     - name: Build static ffmpeg binary
       run: |
+        mkdir -p build
         docker run -v $(pwd)/build:/build -e TARGET_OS=${{ matrix.TARGET_OS }} ffmpeg-builder
     - name: Upload Assets
       uses: actions/upload-artifact@v1
