@@ -8,26 +8,23 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        name: [raspbian-armv6l, debian-armv6l, debian-x86_64]
+        name: [raspbian-armv6l, debian-armv7l, debian-x86_64]
         include:
           - name: raspbian-armv6l
             os: ubuntu-latest
             BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: raspbian
-            TARGET_ARCH: armv6l
-          - name: debian-armv6l
+          - name: debian-armv7l
             os: ubuntu-latest
-            BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
+            BASE_IMAGE: arm32v7/debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: debian
-            TARGET_ARCH: armv6l
           - name: debian-x86_64
             os: ubuntu-latest
             BASE_IMAGE: library/debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: debian
-            TARGET_ARCH: x86_64
 
     steps:
     - uses: actions/checkout@v2
@@ -45,5 +42,5 @@ jobs:
     - name: Upload Assets
       uses: actions/upload-artifact@v1
       with:
-        name: ffmpeg-${{ matrix.TARGET_OS }}-${{ matrix.TARGET_ARCH }}
+        name: ffmpeg-${{ matrix.name }}
         path: build/workspace/bin/ffmpeg
