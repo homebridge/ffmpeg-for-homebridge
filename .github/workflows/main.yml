@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        name: [raspbian-armv6l, debian-x86_64, debian-armv7l, alpine-x86_64, alpine-armv6l]
+        name: [raspbian-armv6l, debian-x86_64, debian-armv7l, alpine-x86_64, alpine-armv6l, darwin-x86_64]
         include:
           - name: raspbian-armv6l
             os: ubuntu-latest
@@ -35,6 +35,8 @@ jobs:
             BASE_IMAGE: arm32v6/alpine:3.11.3
             DOCKERFILE: Dockerfile.alpine
             TARGET_OS: alpine
+          - name: darwin-x86_64
+            os: macOS-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -44,21 +46,35 @@ jobs:
       with:
         path: build
         key: ${{ matrix.name }}-cache
+
+    # Linux Builds
     - name: Setup Dependencies
+      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get --yes --no-install-recommends install binfmt-support qemu-user-static
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
     - name: Build Docker Image 
+      if: runner.os == 'Linux'
       run: |
         docker build --build-arg BASE_IMAGE=${{ matrix.BASE_IMAGE }} -f ${{ matrix.DOCKERFILE }} -t ffmpeg-builder .
     - name: Build static ffmpeg binary
+      if: runner.os == 'Linux'
       run: |
         mkdir -p build
         docker run -v $(pwd)/build:/build -e TARGET_OS=${{ matrix.TARGET_OS }} ffmpeg-builder
     - name: Fix permissions
+      if: runner.os == 'Linux'
       run: |
         sudo chown -R $USER:$USER build
+
+    # macOS Build
+    - name: Build static ffmpeg binary
+      if: runner.os == 'macOS'
+      run: |
+        mkdir -p build
+        cd build && SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg --build
+
     - name: Upload Assets
       uses: actions/upload-artifact@v1
       with:
