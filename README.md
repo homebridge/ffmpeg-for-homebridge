@@ -76,6 +76,12 @@ The `ffmpeg` binary is built with the following options enabled:
   --enable-mmal                 # Raspbian Linux builds only
   ```
 
+## Issues
+
+Issues related to Homebridge, any camera plugins, or your config.json, should be raised on the corresponding project page or the community support forums.
+
+Issues strictly related to the compatibility or installation of the resulting binary may be raised [here](https://github.com/oznu/ffmpeg-for-homebridge/issues).
+
 ## Credits
 
 * Linux and macOS build script: [markus-perl/ffmpeg-build-script](https://github.com/markus-perl/ffmpeg-build-script)
