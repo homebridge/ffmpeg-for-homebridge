@@ -39,7 +39,7 @@ curl -Lfs https://github.com/oznu/ffmpeg-for-homebridge/releases/download/v0.0.1
 
 #### Windows:
 
-Download the `ffmpeg.exe` here [releases page](https://github.com/oznu/ffmpeg-for-homebridge/releases/latest).
+Download `ffmpeg.exe` here [releases page](https://github.com/oznu/ffmpeg-for-homebridge/releases/latest).
 
 ## Build Flags
 
