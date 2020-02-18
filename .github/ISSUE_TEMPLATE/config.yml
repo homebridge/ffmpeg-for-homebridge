@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Support
+    url: https://github.com/oznu/ffmpeg-for-homebridge#issues
+    about: Issues related to Homebridge, any camera plugins, or your config.json, should be raised on the corresponding project page or the community support forums.
   - name: Homebridge Reddit
     url: https://www.reddit.com/r/homebridge/
     about: A place to discuss Homebridge, get help with it, ask questions about it, post plugins, and more.
