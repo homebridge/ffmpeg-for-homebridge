@@ -12,12 +12,12 @@ jobs:
     strategy:
       matrix:
         name: [
-          # raspbian-armv6l,
-          # debian-x86_64,
-          # debian-armv7l,
-          # debian-aarch64,
-          # alpine-x86_64,
-          # alpine-armv6l,
+          raspbian-armv6l,
+          debian-x86_64,
+          debian-armv7l,
+          debian-aarch64,
+          alpine-x86_64,
+          alpine-armv6l,
           alpine-aarch64,
           darwin-x86_64
         ]
@@ -102,4 +102,3 @@ jobs:
       with:
         name: ffmpeg-${{ matrix.name }}
         path: build/workspace/bin/ffmpeg
-        
