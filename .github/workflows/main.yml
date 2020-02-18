@@ -7,20 +7,6 @@ on:
     - 'v*'
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
-        draft: true
-        prerelease: true
-
   build:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -32,7 +18,7 @@ jobs:
           # debian-aarch64,
           # alpine-x86_64,
           # alpine-armv6l,
-          # alpine-aarch64,
+          alpine-aarch64,
           darwin-x86_64
         ]
         include:
@@ -123,7 +109,47 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ jobs.release.steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: build/workspace/bin/ffmpeg
         asset_name: ffmpeg-${{ matrix.name }}
+        asset_content_type: application/octet-stream
+        
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: true
+        prerelease: true
+
+    - uses: actions/download-artifact@master
+      with: ffmpeg-darwin-x86_64
+    - name: Upload Release Asset - ffmpeg-darwin-x86_64
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ffmpeg-darwin-x86_64
+        asset_name: ffmpeg-darwin-x86_64
+        asset_content_type: application/octet-stream
+
+    - uses: actions/download-artifact@master
+      with: ffmpeg-alpine-aarch64
+    - name: Upload Release Asset - ffmpeg-alpine-aarch64
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ffmpeg-alpine-aarch64
+        asset_name: ffmpeg-alpine-aarch64
         asset_content_type: application/octet-stream
