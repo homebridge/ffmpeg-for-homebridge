@@ -122,6 +122,10 @@ jobs:
     - uses: actions/download-artifact@master
       with: 
         name: ffmpeg-darwin-x86_64
+
+    - run: |
+        ls -la
+        
     - name: Upload ffmpeg-darwin-x86_64
       uses: actions/upload-release-asset@v1
       env:
@@ -131,6 +135,7 @@ jobs:
         asset_path: ffmpeg-darwin-x86_64
         asset_name: ffmpeg-darwin-x86_64
         asset_content_type: application/octet-stream
+
 
     - uses: actions/download-artifact@master
       with: 
