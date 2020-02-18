@@ -17,6 +17,30 @@ This project provides static `ffmpeg` binaries for multiple platforms and archit
 | macOS               | x86_64                  |
 | Windows             | x86_64                  |
 
+## Install
+
+### Raspbian Linux:
+
+```
+curl -Lfs https://github.com/oznu/ffmpeg-for-homebridge/releases/download/v0.0.1/ffmpeg-raspbian-armv6l.tar.gz | sudo tar xzf - -C / --no-same-owner
+```
+
+### Debian / Ubuntu Linux:
+
+```
+curl -Lfs https://github.com/oznu/ffmpeg-for-homebridge/releases/download/v0.0.1/ffmpeg-debian-$(uname -m).tar.gz | sudo tar xzf - -C / --no-same-owner
+```
+
+### macOS:
+
+```
+curl -Lfs https://github.com/oznu/ffmpeg-for-homebridge/releases/download/v0.0.1/ffmpeg-darwin-x86_64.tar.gz | sudo tar xzf - -C / --no-same-owner
+```
+
+### Windows:
+
+Download the `ffmpeg.exe` here [releases page](https://github.com/oznu/ffmpeg-for-homebridge/releases/latest).
+
 ## Build Flags
 
 The `ffmpeg` binary is built with the following options enabled:
