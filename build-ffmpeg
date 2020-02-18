@@ -285,6 +285,11 @@ fi
 if build "libtheora"; then
 	download "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.gz" "libtheora-1.1.1.tar.bz"
 	cd $PACKAGES/libtheora-1.1.1 || exit
+
+	# update config.guess to support aarch64 builds
+	curl -Lfs -o config.guess 'https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD'
+	curl -Lfs -o config.sub 'https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD'
+
 	sed "s/-fforce-addr//g" configure > configure.patched
 	chmod +x configure.patched
 	mv configure.patched configure
