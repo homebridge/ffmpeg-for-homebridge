@@ -1,4 +1,4 @@
-![Build ffmpeg](https://github.com/oznu/ffmpeg-for-homebridge/workflows/Build%20ffmpeg/badge.svg)
+[![Build ffmpeg](https://github.com/oznu/ffmpeg-for-homebridge/workflows/Build%20ffmpeg/badge.svg)](https://github.com/oznu/ffmpeg-for-homebridge/actions)
 
 # ffmpeg for homebridge
 
@@ -11,10 +11,11 @@ This project provides static `ffmpeg` binaries for multiple platforms and archit
 
 | OS                  | Supported Architectures |
 |---------------------|-------------------------|
-| macOS               | x86_64                  |
+| Raspbian Linux      | armv6l (armv7l)         |
 | Debian/Ubuntu Linux | x86_64, armv7l, aarch64 |
 | Alpine Linux        | x86_64, armv6l, aarch64 |
-| Raspbian Linux      | armv6l (armv7l)         |
+| macOS               | x86_64                  |
+| Windows             | x86_64                  |
 
 ## Build Flags
 
@@ -53,4 +54,5 @@ The `ffmpeg` binary is built with the following options enabled:
 
 ## Credits
 
-The script to build `ffmpeg` as a static binary on Linux and macOS was created by [markus-perl/ffmpeg-build-script](https://github.com/markus-perl/ffmpeg-build-script).
+* Linux and macOS build script: [markus-perl/ffmpeg-build-script](https://github.com/markus-perl/ffmpeg-build-script)
+* Windows build script: [rdp/ffmpeg-windows-build-helpers](https://github.com/rdp/ffmpeg-windows-build-helpers)
