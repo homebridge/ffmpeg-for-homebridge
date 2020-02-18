@@ -123,16 +123,13 @@ jobs:
       with: 
         name: ffmpeg-darwin-x86_64
 
-    - run: |
-        ls -la
-        
     - name: Upload ffmpeg-darwin-x86_64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ffmpeg-darwin-x86_64
+        asset_path: ffmpeg-darwin-x86_64/ffmpeg-darwin-x86_64
         asset_name: ffmpeg-darwin-x86_64
         asset_content_type: application/octet-stream
 
@@ -146,6 +143,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ffmpeg-alpine-aarch64
+        asset_path: ffmpeg-alpine-aarch64/ffmpeg-alpine-aarch64
         asset_name: ffmpeg-alpine-aarch64
         asset_content_type: application/octet-stream
