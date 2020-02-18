@@ -132,7 +132,6 @@ jobs:
       with: 
         name: ffmpeg-darwin-x86_64
     - name: Upload Release Asset - ffmpeg-darwin-x86_64
-      id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -146,7 +145,6 @@ jobs:
       with: 
         name: ffmpeg-alpine-aarch64
     - name: Upload Release Asset - ffmpeg-alpine-aarch64
-      id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
