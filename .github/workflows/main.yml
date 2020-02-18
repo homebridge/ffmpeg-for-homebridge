@@ -97,8 +97,14 @@ jobs:
         mkdir -p build
         cd build && SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg --build
 
-    - name: Upload Assets
+    - name: Prepare Asset
+      run: |
+        mkdir -p package/usr/local/bin/
+        cp build/workspace/bin/ffmpeg package/usr/local/bin/ffmpeg
+        tar -C package -zcvf ffmpeg-${{ matrix.name }}.tar.gz .
+
+    - name: Upload Asset
       uses: actions/upload-artifact@v1
       with:
         name: ffmpeg-${{ matrix.name }}
-        path: build/workspace/bin/ffmpeg
+        path: ffmpeg-${{ matrix.name }}.tar.gz
