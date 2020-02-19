@@ -2,7 +2,7 @@
 
 # ffmpeg for homebridge
 
-This project provides static `ffmpeg` binaries for multiple platforms and architectures for use with Homebridge.
+This project provides static `ffmpeg` binaries for multiple platforms and architectures for use with [Homebridge](https://github.com/nfarina/homebridge).
 
 * Audio support using `libfdk-aac`
 * Hardware decoding on the Raspberry Pi using `h264_omx`
@@ -34,12 +34,12 @@ curl -Lfs https://github.com/oznu/ffmpeg-for-homebridge/releases/download/v0.0.1
 #### macOS:
 
 ```
-curl -Lfs https://github.com/oznu/ffmpeg-for-homebridge/releases/download/v0.0.1/ffmpeg-darwin-x86_64.tar.gz | sudo tar xzf - -C / --no-same-owner
+curl -Lfs https://github.com/oznu/ffmpeg-for-homebridge/releases/download/v0.0.1/ffmpeg-darwin-x86_64.tar.gz | sudo tar xzfm - -C / --no-same-owner
 ```
 
 #### Windows:
 
-Download `ffmpeg.exe` here [releases page](https://github.com/oznu/ffmpeg-for-homebridge/releases/latest).
+Download the `ffmpeg.exe` file from the [releases page](https://github.com/oznu/ffmpeg-for-homebridge/releases/latest).
 
 ## Build Flags
 
@@ -78,7 +78,7 @@ The `ffmpeg` binary is built with the following options enabled:
 
 ## Issues
 
-Issues related to Homebridge, any camera plugins, or your config.json, should be raised on the corresponding project page or the community support forums.
+Issues related to Homebridge, any camera plugins, or your config.json, should be raised on the corresponding project page or community support forums.
 
 Issues strictly related to the compatibility or installation of the resulting binary may be raised [here](https://github.com/oznu/ffmpeg-for-homebridge/issues).
 
