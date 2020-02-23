@@ -177,7 +177,7 @@ async function install() {
   const ffmpegTargetPath = path.resolve(__dirname, os.platform() === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
 
   // extract ffmpeg binary from the downloaded tar.gz on non-windows platforms
-  if (!os.platform() !== 'win32') {
+  if (os.platform() !== 'win32') {
 
     try {
       await tar.x({

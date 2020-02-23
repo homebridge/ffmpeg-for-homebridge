@@ -1,6 +1,6 @@
 {
   "name": "ffmpeg-for-homebridge",
-  "version": "0.0.1-test.14",
+  "version": "0.0.1-test.15",
   "description": "Static ffmpeg binaries for Homebridge with support for audio (libfdk-aac) and hardware decoding (h264_omx).",
   "author": "oznu <dev@oz.nu>",
   "homepage": "https://github.com/oznu/ffmpeg-for-homebridge#readme",
