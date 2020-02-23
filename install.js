@@ -126,9 +126,12 @@ async function downloadFfmpeg(downloadUrl, ffmpegDownloadPath) {
       file.on('finish', () => {
         console.log(' - Download Complete');
         file.close();
-        fs.renameSync(tempFile, ffmpegDownloadPath);
-        resolve()
       });
+
+      file.on('close', () => {
+        fs.renameSync(tempFile, ffmpegDownloadPath);
+        resolve();
+      })
 
       file.on('error', (error) => {
         console.log(error);
@@ -178,7 +181,6 @@ async function install() {
 
   // extract ffmpeg binary from the downloaded tar.gz on non-windows platforms
   if (os.platform() !== 'win32') {
-
     try {
       await tar.x({
         file: ffmpegDownloadPath,
@@ -198,6 +200,11 @@ async function install() {
     if (fs.existsSync(ffmpegTempPath)) {
       fs.chmodSync(ffmpegTempPath, 0o755);
     }
+  }
+
+  // no need to extract for windows - just copy the downloaded binary to the temp path on windows
+  if (os.platform() === 'win32') {
+    fs.copyFileSync(ffmpegDownloadPath, ffmpegTempPath)
   }
 
   // check if the downloaded binary works
