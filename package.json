@@ -1,0 +1,39 @@
+{
+  "name": "ffmpeg-for-homebridge",
+  "version": "0.0.1-test.14",
+  "description": "Static ffmpeg binaries for Homebridge with support for audio (libfdk-aac) and hardware decoding (h264_omx).",
+  "author": "oznu <dev@oz.nu>",
+  "homepage": "https://github.com/oznu/ffmpeg-for-homebridge#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oznu/ffmpeg-for-homebridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oznu/ffmpeg-for-homebridge/issues"
+  },
+  "main": "index.js",
+  "scripts": {
+    "install": "node install.js"
+  },
+  "files": [
+    "install.js",
+    "index.js",
+    ".cache"
+  ],
+  "keywords": [
+    "homebridge",
+    "ffmpeg",
+    "camera",
+    "homekit",
+    "audio",
+    "libfdk-aac",
+    "h264_omx"
+  ],
+  "dependencies": {
+    "detect-libc": "^1.0.3",
+    "dotenv": "^8.2.0",
+    "mkdirp": "^1.0.3",
+    "simple-get": "^3.1.0",
+    "tar": "^6.0.1"
+  }
+}
