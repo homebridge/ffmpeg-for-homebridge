@@ -14,7 +14,7 @@ This project provides static `ffmpeg` binaries for multiple platforms and archit
 | Raspbian Linux      | armv6l (armv7l)         |
 | Debian/Ubuntu Linux | x86_64, armv7l, aarch64 |
 | Alpine Linux        | x86_64, armv6l, aarch64 |
-| macOS               | x86_64                  |
+| macOS (10.14+)      | x86_64                  |
 | Windows             | x86_64                  |
 
 ## Install
