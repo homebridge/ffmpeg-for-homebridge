@@ -22,19 +22,19 @@ This project provides static `ffmpeg` binaries for multiple platforms and archit
 #### Raspbian Linux:
 
 ```
-curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-raspbian-armv6l.tar.gz | sudo tar xzf - -C / --no-same-owner
+sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-raspbian-armv6l.tar.gz | sudo tar xzf - -C / --no-same-owner
 ```
 
 #### Debian / Ubuntu Linux:
 
 ```
-curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-debian-$(uname -m).tar.gz | sudo tar xzf - -C / --no-same-owner
+sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-debian-$(uname -m).tar.gz | sudo tar xzf - -C / --no-same-owner
 ```
 
 #### macOS:
 
 ```
-curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-darwin-x86_64.tar.gz | sudo tar xzfm - -C / --no-same-owner
+sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-darwin-x86_64.tar.gz | sudo tar xzfm - -C / --no-same-owner
 ```
 
 #### Windows:
