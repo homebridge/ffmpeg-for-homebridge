@@ -1,15 +1,15 @@
 {
   "name": "ffmpeg-for-homebridge",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Static ffmpeg binaries for Homebridge with support for audio (libfdk-aac) and hardware decoding (h264_omx).",
   "author": "oznu <dev@oz.nu>",
-  "homepage": "https://github.com/oznu/ffmpeg-for-homebridge#readme",
+  "homepage": "https://github.com/homebridge/ffmpeg-for-homebridge#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oznu/ffmpeg-for-homebridge.git"
+    "url": "git+https://github.com/homebridge/ffmpeg-for-homebridge.git"
   },
   "bugs": {
-    "url": "https://github.com/oznu/ffmpeg-for-homebridge/issues"
+    "url": "https://github.com/homebridge/ffmpeg-for-homebridge/issues"
   },
   "main": "index.js",
   "scripts": {
