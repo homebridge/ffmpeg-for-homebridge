@@ -168,7 +168,7 @@ async function install() {
   const ffmpegDownloadPath = path.resolve(ffmpegCache(), getNpmPackageVersion() + '-' + ffmpegDownloadFileName);
 
   // construct the download url
-  const downloadUrl = `https://github.com/oznu/ffmpeg-for-homebridge/releases/latest/download/${ffmpegDownloadFileName}`;
+  const downloadUrl = `https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/${ffmpegDownloadFileName}`;
 
   // download if not cached
   if (!fs.existsSync(ffmpegDownloadPath)) {
@@ -221,7 +221,7 @@ async function install() {
   fs.copyFileSync(ffmpegTempPath, ffmpegTargetPath);
 
   console.log(`\x1b[36m\nffmpeg has been downloaded to ${ffmpegTargetPath}\x1b[0m`);
-  console.log(`\x1b[37mThank you for using \x1b[4mhttps://github.com/oznu/ffmpeg-for-homebridge\x1b[0m\n`);
+  console.log(`\x1b[37mThank you for using \x1b[4mhttps://github.com/homebridge/ffmpeg-for-homebridge\x1b[0m\n`);
 }
 
 async function bootstrap() {

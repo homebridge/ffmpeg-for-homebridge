@@ -1,4 +1,4 @@
-[![Build ffmpeg](https://github.com/oznu/ffmpeg-for-homebridge/workflows/Build%20ffmpeg/badge.svg)](https://github.com/oznu/ffmpeg-for-homebridge/actions)
+[![Build ffmpeg](https://github.com/homebridge/ffmpeg-for-homebridge/workflows/Build%20ffmpeg/badge.svg)](https://github.com/homebridge/ffmpeg-for-homebridge/actions)
 
 # ffmpeg for homebridge
 
@@ -22,24 +22,24 @@ This project provides static `ffmpeg` binaries for multiple platforms and archit
 #### Raspbian Linux:
 
 ```
-curl -Lf# https://github.com/oznu/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-raspbian-armv6l.tar.gz | sudo tar xzf - -C / --no-same-owner
+curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-raspbian-armv6l.tar.gz | sudo tar xzf - -C / --no-same-owner
 ```
 
 #### Debian / Ubuntu Linux:
 
 ```
-curl -Lf# https://github.com/oznu/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-debian-$(uname -m).tar.gz | sudo tar xzf - -C / --no-same-owner
+curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-debian-$(uname -m).tar.gz | sudo tar xzf - -C / --no-same-owner
 ```
 
 #### macOS:
 
 ```
-curl -Lf# https://github.com/oznu/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-darwin-x86_64.tar.gz | sudo tar xzfm - -C / --no-same-owner
+curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-darwin-x86_64.tar.gz | sudo tar xzfm - -C / --no-same-owner
 ```
 
 #### Windows:
 
-Download the `ffmpeg.exe` file from the [releases page](https://github.com/oznu/ffmpeg-for-homebridge/releases/latest).
+Download the `ffmpeg.exe` file from the [releases page](https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest).
 
 ## Build Flags
 
@@ -80,7 +80,7 @@ The `ffmpeg` binary is built with the following options enabled:
 
 Issues related to Homebridge, any camera plugins, or your config.json, should be raised on the corresponding project page or community support forums.
 
-Issues strictly related to the compatibility or installation of the resulting binary may be raised [here](https://github.com/oznu/ffmpeg-for-homebridge/issues).
+Issues strictly related to the compatibility or installation of the resulting binary may be raised [here](https://github.com/homebridge/ffmpeg-for-homebridge/issues).
 
 ## Plugin Dependency
 
