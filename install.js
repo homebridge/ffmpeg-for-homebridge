@@ -152,6 +152,10 @@ function binaryOk(ffmpegTempPath) {
   }
 }
 
+function displayErrorMessage() {
+  console.log(`\n\x1b[36mThe homebridge plugin has been installed, however you may need to install ffmpeg separately.\x1b[0m\n`);
+}
+
 async function install() {
   // ensure the ffmpeg npm cache directory exists
   ensureFfmpegCacheDir();
@@ -160,7 +164,7 @@ async function install() {
   const ffmpegDownloadFileName = getDownloadFileName();
 
   if (!ffmpegDownloadFileName) {
-    console.error(`ffmpeg-for-homebridge: ${os.platform()} ${process.arch} is not supported, you will need to compile ffmpeg manually.`);
+    console.log(`ffmpeg-for-homebridge: ${os.platform()} ${process.arch} is not supported, you will need to install/compile ffmpeg manually.`);
     process.exit(0);
   }
 
@@ -190,6 +194,7 @@ async function install() {
     } catch (e) {
       console.error(e);
       console.error('An error occured while extracting the downloaded ffmpeg binary.');
+      displayErrorMessage();
       
       // delete the cached download if it failed to extract
       fs.unlinkSync(ffmpegDownloadPath);
@@ -209,7 +214,7 @@ async function install() {
 
   // check if the downloaded binary works
   if (!binaryOk(ffmpegTempPath)) {
-    console.error('An error occured while testing the downloaded ffmpeg binary.');
+    displayErrorMessage();
     
     // delete the cached download if it failed the test
     fs.unlinkSync(ffmpegDownloadPath);
@@ -228,9 +233,10 @@ async function bootstrap() {
   try {
     await install();
   } catch (e) {
-    console.error(e);
-    console.log(`\n\n\x1b[31mFailed to download ffmpeg binary.\nIf you are installing this package as a global module (-g) make sure you add the --unsafe-perm flag to the install command.\x1b[0m\n\n`);
-
+    if (e && e.code && e.code === 'EACCES') {
+      console.log(`Failed to download ffmpeg binary.\nIf you are installing this plugin as a global module (-g) make sure you add the --unsafe-perm flag to the install command.`);
+    }
+    displayErrorMessage();
     setTimeout(() => {
       process.exit(0);
     });
