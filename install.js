@@ -39,7 +39,7 @@ function getDownloadFileName() {
   switch (os.platform()) {
     case 'darwin':
       // only x64 is supported
-      if (process.arch === 'x64') {
+      if (process.arch === 'x64' && parseInt(os.release()) >= 18) {
         return 'ffmpeg-darwin-x86_64.tar.gz'
       } else {
         return null;
