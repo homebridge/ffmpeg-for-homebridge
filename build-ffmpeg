@@ -329,6 +329,15 @@ if build "fdk_aac"; then
 	build_done "fdk_aac"
 fi
 
+if build "speex"; then
+	download "https://downloads.xiph.org/releases/speex/speex-1.2.0.tar.gz" "speex-1.2.0.tar.gz"
+	cd $PACKAGES/speex-1.2.0 || exit
+	execute ./configure --prefix=${WORKSPACE} --disable-shared --enable-static
+	execute make -j $MJOBS
+	execute make install
+	build_done "speex"
+fi
+
 if build "zlib"; then
 	download "https://www.zlib.net/zlib-1.2.11.tar.gz" "zlib-1.2.11.tar.gz"
 	cd $PACKAGES/zlib-1.2.11 || exit
@@ -375,6 +384,7 @@ cd $PACKAGES/ffmpeg-47773f7/ || exit
 	--enable-libx264 \
 	--enable-runtime-cpudetect \
 	--enable-libfdk-aac \
+	--enable-libspeex \
 	--enable-avfilter \
 	--enable-libopencore_amrwb \
 	--enable-libopencore_amrnb \
