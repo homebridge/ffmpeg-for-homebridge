@@ -100,12 +100,8 @@ npm install --save ffmpeg-for-homebridge
 ```js
 var pathToFfmpeg = require('ffmpeg-for-homebridge');
 
-if (pathToFfmpeg) {
-  child_process.spawn(pathToFfmpeg, [])
-} else {
-  // fallback, load from PATH
-  child_process.spawn('ffmpeg', [])
-}
+// fallback to system ffmpeg
+child_process.spawn(pathToFfmpeg || 'ffmpeg', []);
 ```
 
 If `ffmpeg` is not supported on the user's platform, or this package failed to download the `ffmpeg` binary, the package will return `undefined`, you should check for this and and try and use `ffmpeg` from the user's `PATH` instead.
