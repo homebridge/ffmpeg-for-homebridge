@@ -9,13 +9,15 @@ This project provides static `ffmpeg` binaries for multiple platforms and archit
 
 ## Supported Platforms
 
-| OS                  | Supported Architectures |
-|---------------------|-------------------------|
-| Raspbian Linux (9+) | armv6l (armv7l)         |
-| Debian/Ubuntu Linux | x86_64, armv7l, aarch64 |
-| Alpine Linux        | x86_64, armv6l, aarch64 |
-| macOS (10.14+)      | x86_64                  |
-| Windows 10          | x86_64                  |
+| OS                     | Supported Architectures |
+|------------------------|-------------------------|
+| Raspbian Linux (9+)    | armv6l (armv7l)         |
+| Debian/Ubuntu Linux    | x86_64, armv7l, aarch64 |
+| Alpine Linux           | x86_64, armv6l, aarch64 |
+| macOS (10.14+)         | x86_64                  |
+| Windows 10<sup>*</sup> | x86_64                  |
+
+<sup>*</sup> Not all codecs are supported on Windows 10.
 
 ## Install
 
@@ -58,6 +60,7 @@ The `ffmpeg` binary is built with the following options enabled:
   --enable-pthreads
   --enable-libvpx
   --enable-libmp3lame
+  --enable-libspeex
   --enable-libopus
   --enable-libtheora
   --enable-libvorbis
@@ -72,6 +75,8 @@ The `ffmpeg` binary is built with the following options enabled:
   --enable-network
   --enable-protocol=tcp
   --enable-demuxer=rtsp
+  --enable-indev=alsa           # Linux Only
+  --enable-outdev=alsa          # Linux Only
   --enable-omx-rpi              # Raspbian Linux builds only
   --enable-mmal                 # Raspbian Linux builds only
   ```
