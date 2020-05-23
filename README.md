@@ -1,4 +1,5 @@
 [![Build ffmpeg](https://github.com/homebridge/ffmpeg-for-homebridge/workflows/Build%20ffmpeg/badge.svg)](https://github.com/homebridge/ffmpeg-for-homebridge/actions)
+[![GitHub All Releases](https://img.shields.io/github/downloads/homebridge/ffmpeg-for-homebridge/total)](https://somsubhra.com/github-release-stats/?username=homebridge&repository=ffmpeg-for-homebridge)
 
 # ffmpeg for homebridge
 
