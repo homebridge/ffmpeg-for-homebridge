@@ -364,7 +364,7 @@ if [ "$(uname)" = "Linux" ]; then
 	if build "alsa"; then
 		download "ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.2.2.tar.bz2" "alsa-lib-1.2.2.tar.bz2"
 		cd $PACKAGES/alsa-lib-1.2.2 || exit
-		execute ./configure --prefix=${WORKSPACE} --enable-static --disable-shared
+		execute ./configure --prefix=${WORKSPACE} --with-configdir=/usr/share/alsa --enable-static --disable-shared
 		execute make -j $MJOBS
 		execute make install
 		build_done "alsa"
