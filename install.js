@@ -13,7 +13,7 @@ const tar = require('tar');
 
 function getNpmPackageVersion() {
   // return 'v' + process.env.npm_package_version;
-  return 'v0.0.5';
+  return 'v0.0.6';
 }
 
 function npmCache() {
