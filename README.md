@@ -10,13 +10,13 @@ This project provides static `ffmpeg` binaries for multiple platforms and archit
 
 ## Supported Platforms
 
-| OS                     | Supported Architectures |
-|------------------------|-------------------------|
-| Raspbian Linux (9+)    | armv6l (armv7l)         |
-| Debian/Ubuntu Linux    | x86_64, armv7l, aarch64 |
-| Alpine Linux           | x86_64, armv6l, aarch64 |
-| macOS (10.14+)         | x86_64                  |
-| Windows 10<sup>*</sup> | x86_64                  |
+| OS                              | Supported Architectures |
+|---------------------------------|-------------------------|
+| Raspbian Linux (9+)             | armv6l (armv7l)         |
+| Debian/Ubuntu Linux             | x86_64, armv7l, aarch64 |
+| Alpine Linux                    | x86_64, armv6l, aarch64 |
+| macOS (10.14 "Mojave" or newer) | x86_64                  |
+| Windows 10<sup>*</sup>          | x86_64                  |
 
 <sup>*</sup> Not all codecs are supported on Windows 10.
 
