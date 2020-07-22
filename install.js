@@ -164,7 +164,11 @@ async function install() {
   const ffmpegDownloadFileName = getDownloadFileName();
 
   if (!ffmpegDownloadFileName) {
-    console.log(`ffmpeg-for-homebridge: ${os.platform()} ${process.arch} is not supported, you will need to install/compile ffmpeg manually.`);
+    if (os.platform() === 'darwin' && parseInt(os.release()) < 18) {
+      console.log(`ffmpeg-for-homebridge: macOS versions older than 10.14 "Mojave" are not supported, you will need to install/compile ffmpeg manually.`);
+    } else {
+      console.log(`ffmpeg-for-homebridge: ${os.platform()} ${process.arch} is not supported, you will need to install/compile ffmpeg manually.`);
+    }
     process.exit(0);
   }
 
