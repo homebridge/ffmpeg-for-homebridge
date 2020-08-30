@@ -12,12 +12,14 @@
     "url": "https://github.com/homebridge/ffmpeg-for-homebridge/issues"
   },
   "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "install": "node install.js"
   },
   "files": [
     "install.js",
-    "index.js"
+    "index.js",
+    "index.d.js"
   ],
   "keywords": [
     "homebridge",
