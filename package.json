@@ -19,7 +19,7 @@
   "files": [
     "install.js",
     "index.js",
-    "index.d.js"
+    "index.d.ts"
   ],
   "keywords": [
     "homebridge",
