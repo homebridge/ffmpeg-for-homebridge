@@ -90,7 +90,7 @@ Issues strictly related to the compatibility or installation of the resulting bi
 
 ## Plugin Dependency
 
-This section is for Homebridge Plugin developers, if you need to install `ffmpeg` see the instructions above.
+**This section is for Homebridge Plugin developers only, if you need to install `ffmpeg` see the instructions above.**
 
 You can optionally include this package as a dependency in your Homebridge camera plugins, by doing this the correct `ffmpeg` binary will automatically be downloaded to your user's server when they install your plugin.
 
