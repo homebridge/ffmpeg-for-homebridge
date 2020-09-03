@@ -98,10 +98,14 @@ You can optionally include this package as a dependency in your Homebridge camer
 npm install --save ffmpeg-for-homebridge
 ```
 
-```js
+```ts
+// .js
 var pathToFfmpeg = require('ffmpeg-for-homebridge');
 
-// fallback to system ffmpeg
+// .ts
+import pathToFfmpeg from 'ffmpeg-for-homebridge';
+
+// fallback to system ffmpeg (replace this with your own ffmpeg spawn command)
 child_process.spawn(pathToFfmpeg || 'ffmpeg', []);
 ```
 
