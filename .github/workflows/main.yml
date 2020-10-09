@@ -14,7 +14,6 @@ jobs:
         name: [
           raspbian-armv6l,
           debian-x86_64,
-          debian-i386,
           debian-armv7l,
           debian-aarch64,
           alpine-x86_64,
@@ -31,11 +30,6 @@ jobs:
           - name: debian-x86_64
             os: ubuntu-latest
             BASE_IMAGE: library/debian:stretch
-            DOCKERFILE: Dockerfile.debian
-            TARGET_OS: debian
-          - name: debian-i386
-            os: ubuntu-latest
-            BASE_IMAGE: i386/debian:stretch
             DOCKERFILE: Dockerfile.debian
             TARGET_OS: debian
           - name: debian-armv7l
