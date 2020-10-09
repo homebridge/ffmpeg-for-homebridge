@@ -18,6 +18,7 @@ jobs:
           debian-armv7l,
           debian-aarch64,
           alpine-x86_64,
+          alpine-i386,
           alpine-armv6l,
           alpine-aarch64,
           darwin-x86_64
@@ -51,6 +52,11 @@ jobs:
           - name: alpine-x86_64
             os: ubuntu-latest
             BASE_IMAGE: library/alpine:3.11.3
+            DOCKERFILE: Dockerfile.alpine
+            TARGET_OS: alpine
+          - name: alpine-i386
+            os: ubuntu-latest
+            BASE_IMAGE: i386/alpine:3.11.3
             DOCKERFILE: Dockerfile.alpine
             TARGET_OS: alpine
           - name: alpine-armv6l
