@@ -12,51 +12,9 @@ jobs:
     strategy:
       matrix:
         name: [
-          raspbian-armv6l,
-          debian-x86_64,
-          debian-armv7l,
-          debian-aarch64,
-          alpine-x86_64,
-          alpine-armv6l,
-          alpine-aarch64,
           darwin-x86_64
         ]
         include:
-          - name: raspbian-armv6l
-            os: ubuntu-latest
-            BASE_IMAGE: balenalib/raspberry-pi-debian:stretch
-            DOCKERFILE: Dockerfile.debian
-            TARGET_OS: raspbian
-          - name: debian-x86_64
-            os: ubuntu-latest
-            BASE_IMAGE: library/debian:stretch
-            DOCKERFILE: Dockerfile.debian
-            TARGET_OS: debian
-          - name: debian-armv7l
-            os: ubuntu-latest
-            BASE_IMAGE: arm32v7/debian:stretch
-            DOCKERFILE: Dockerfile.debian
-            TARGET_OS: debian
-          - name: debian-aarch64
-            os: ubuntu-latest
-            BASE_IMAGE: arm64v8/debian:stretch
-            DOCKERFILE: Dockerfile.debian
-            TARGET_OS: debian
-          - name: alpine-x86_64
-            os: ubuntu-latest
-            BASE_IMAGE: library/alpine:3.11.3
-            DOCKERFILE: Dockerfile.alpine
-            TARGET_OS: alpine
-          - name: alpine-armv6l
-            os: ubuntu-latest
-            BASE_IMAGE: arm32v6/alpine:3.11.3
-            DOCKERFILE: Dockerfile.alpine
-            TARGET_OS: alpine
-          - name: alpine-aarch64
-            os: ubuntu-latest
-            BASE_IMAGE: arm64v8/alpine:3.11.3
-            DOCKERFILE: Dockerfile.alpine
-            TARGET_OS: alpine
           - name: darwin-x86_64
             os: macOS-latest
 
