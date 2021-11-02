@@ -32,9 +32,9 @@
   ],
   "dependencies": {
     "detect-libc": "^1.0.3",
-    "dotenv": "^8.2.0",
-    "mkdirp": "^1.0.3",
-    "simple-get": "^3.1.0",
-    "tar": "^6.0.1"
+    "dotenv": "^10.0.0",
+    "mkdirp": "^1.0.4",
+    "simple-get": "^4.0.0",
+    "tar": "^6.1.11"
   }
 }
