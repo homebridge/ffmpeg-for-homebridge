@@ -172,7 +172,7 @@ if ! command_exists "curl"; then
 fi
 
 if build "yasm"; then
-	download "https://www.tortall.net/projects/yasm/releases/yasm-1.3.0.tar.gz" "yasm-1.3.0.tar.gz"
+	download "http://www.tortall.net/projects/yasm/releases/yasm-1.3.0.tar.gz" "yasm-1.3.0.tar.gz"
 	cd $PACKAGES/yasm-1.3.0 || exit
 	execute ./configure --prefix=${WORKSPACE}
 	execute make -j $MJOBS
@@ -374,8 +374,8 @@ fi
 
 
 build "ffmpeg"
-download "https://ffmpeg.org/releases/ffmpeg-4.3.1.tar.bz2" "ffmpeg-4.3.1.tar.bz2"
-cd $PACKAGES/ffmpeg-4.3.1/ || exit
+download "https://ffmpeg.org/releases/ffmpeg-4.4.tar.bz2" "ffmpeg-4.4.tar.bz2"
+cd $PACKAGES/ffmpeg-4.4/ || exit
 ./configure $ADDITIONAL_CONFIGURE_OPTIONS \
     --pkgconfigdir="$WORKSPACE/lib/pkgconfig" \
     --prefix=${WORKSPACE} \
