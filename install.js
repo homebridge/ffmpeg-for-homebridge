@@ -38,11 +38,15 @@ function ensureFfmpegCacheDir() {
 function getDownloadFileName() {
   switch (os.platform()) {
     case 'darwin':
-      // only x64 is supported
-      if (process.arch === 'x64' && parseInt(os.release()) >= 18) {
-        return 'ffmpeg-darwin-x86_64.tar.gz'
-      } else {
-        return null;
+      if (parseInt(os.release()) >= 18) {
+        switch (process.arch) {
+          case 'x64':
+            return 'ffmpeg-darwin-x86_64.tar.gz';
+          case 'arm64':
+            return 'ffmpeg-darwin-arm64.tar.gz';
+          default:
+            return null;
+        }
       }
     case 'linux':
       let osReleaseEnv = {};
