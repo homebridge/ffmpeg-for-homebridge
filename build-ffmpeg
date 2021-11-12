@@ -26,7 +26,7 @@ elif [[ -f /proc/cpuinfo ]]; then
     MJOBS=$(grep -c processor /proc/cpuinfo)
 elif [[ "$OSTYPE" == "darwin"* ]]; then
 	MJOBS=$(sysctl -n machdep.cpu.thread_count)
-	ADDITIONAL_CONFIGURE_OPTIONS="--enable-videotoolbox"
+	ADDITIONAL_CONFIGURE_OPTIONS="--enable-audiotoolbox --enable-videotoolbox --arch=arm64"
 else
     MJOBS=4
 fi
@@ -263,6 +263,47 @@ if build "x264"; then
 	build_done "x264"
 fi
 
+  if build "x265" "3.5"; then
+    download "https://github.com/videolan/x265/archive/Release_3.5.tar.gz" "x265-3.5.tar.gz" # This is actually 3.4 if looking at x265Version.txt
+    cd build/linux || exit
+    rm -rf 8bit 10bit 12bit 2>/dev/null
+    mkdir -p 8bit 10bit 12bit
+    cd 12bit || exit
+    execute cmake ../../../source -DCMAKE_INSTALL_PREFIX="${WORKSPACE}" -DENABLE_SHARED=OFF -DBUILD_SHARED_LIBS=OFF -DHIGH_BIT_DEPTH=ON -DENABLE_HDR10_PLUS=ON -DEXPORT_C_API=OFF -DENABLE_CLI=OFF -DMAIN12=ON
+    execute make -j $MJOBS
+    cd ../10bit || exit
+    execute cmake ../../../source -DCMAKE_INSTALL_PREFIX="${WORKSPACE}" -DENABLE_SHARED=OFF -DBUILD_SHARED_LIBS=OFF -DHIGH_BIT_DEPTH=ON -DENABLE_HDR10_PLUS=ON -DEXPORT_C_API=OFF -DENABLE_CLI=OFF
+    execute make -j $MJOBS
+    cd ../8bit || exit
+    ln -sf ../10bit/libx265.a libx265_main10.a
+    ln -sf ../12bit/libx265.a libx265_main12.a
+    execute cmake ../../../source -DCMAKE_INSTALL_PREFIX="${WORKSPACE}" -DENABLE_SHARED=OFF -DBUILD_SHARED_LIBS=OFF -DEXTRA_LIB="x265_main10.a;x265_main12.a;-ldl" -DEXTRA_LINK_FLAGS=-L. -DLINKED_10BIT=ON -DLINKED_12BIT=ON
+    execute make -j $MJOBS
+
+    mv libx265.a libx265_main.a
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      execute "${MACOS_LIBTOOL}" -static -o libx265.a libx265_main.a libx265_main10.a libx265_main12.a 2>/dev/null
+    else
+      execute ar -M <<EOF
+CREATE libx265.a
+ADDLIB libx265_main.a
+ADDLIB libx265_main10.a
+ADDLIB libx265_main12.a
+SAVE
+END
+EOF
+    fi
+
+    execute make install
+
+    if [ -n "$LDEXEFLAGS" ]; then
+      sed -i.backup 's/-lgcc_s/-lgcc_eh/g' "${WORKSPACE}/lib/pkgconfig/x265.pc" # The -i.backup is intended and required on MacOS: https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
+    fi
+
+    build_done "x265" "3.5"
+  fi
+
 if build "libogg"; then
 	download "https://ftp.osuosl.org/pub/xiph/releases/ogg/libogg-1.3.3.tar.gz" "libogg-1.3.3.tar.gz"
 	cd $PACKAGES/libogg-1.3.3 || exit
@@ -375,7 +416,7 @@ fi
 
 build "ffmpeg"
 download "https://ffmpeg.org/releases/ffmpeg-4.4.1.tar.bz2" "ffmpeg-4.4.1.tar.bz2"
-cd $PACKAGES/ffmpeg-4.4/ || exit
+cd $PACKAGES/ffmpeg-4.4.1/ || exit
 ./configure $ADDITIONAL_CONFIGURE_OPTIONS \
     --pkgconfigdir="$WORKSPACE/lib/pkgconfig" \
     --prefix=${WORKSPACE} \
@@ -398,7 +439,9 @@ cd $PACKAGES/ffmpeg-4.4/ || exit
   --enable-libopus \
 	--enable-libtheora \
 	--enable-libvorbis \
+	--enable-libvidstab \
 	--enable-libx264 \
+	--enable-libx265 \
 	--enable-runtime-cpudetect \
 	--enable-libfdk-aac \
 	--enable-avfilter \
@@ -410,6 +453,7 @@ cd $PACKAGES/ffmpeg-4.4/ || exit
 	--enable-protocol=tcp \
 	--enable-libspeex \
 	--enable-demuxer=rtsp $EXTRA_FLAGS
+	--enable-postproc
 
 execute make -j $MJOBS
 execute make install
