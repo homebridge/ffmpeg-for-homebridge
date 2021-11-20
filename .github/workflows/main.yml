@@ -100,6 +100,12 @@ jobs:
         mkdir -p build
         cd build && SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg --build
 
+    - name: macOS M1 (Apple Silicon) - Build static ffmpeg binary
+      if: runner.os == 'macOS'
+      run: |
+        mkdir -p build
+        cd build && SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg-m1 --build
+
     - name: Prepare Asset
       run: |
         mkdir -p package/usr/local/bin/
