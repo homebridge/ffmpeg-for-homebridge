@@ -1,10 +1,6 @@
 workspace
 build
-<<<<<<< Updated upstream
 packages
-=======
-packages/*
->>>>>>> Stashed changes
 node_modules
 ffmpeg
 *.tgz
