@@ -1,6 +1,7 @@
 workspace
 build
-package
+packages
 node_modules
 ffmpeg
 *.tgz
+.DS_Store
