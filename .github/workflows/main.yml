@@ -108,3 +108,12 @@ jobs:
       with:
         name: ffmpeg-${{ matrix.name }}
         path: ffmpeg-${{ matrix.name }}.tar.gz
+        
+  publish:
+    needs: build_and_test
+
+    if: ${{ github.repository == 'homebridge/homebridge' }}
+
+    uses: homebridge/.github/.github/workflows/npm-publish.yml@main
+    secrets:
+      npm_auth_token: ${{ secrets.npm_token }}
