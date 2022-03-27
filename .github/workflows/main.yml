@@ -19,8 +19,7 @@ jobs:
           alpine-x86_64,
           alpine-armv6l,
           alpine-aarch64,
-          darwin-x86_64,
-          darwin-arm64
+          darwin-x86_64
         ]
         include:
           - name: raspbian-armv6l
@@ -59,8 +58,6 @@ jobs:
             DOCKERFILE: Dockerfile.alpine
             TARGET_OS: alpine
           - name: darwin-x86_64
-            os: macOS-latest
-          - name: darwin-arm64
             os: macOS-latest
 
     steps:
