@@ -110,7 +110,7 @@ jobs:
         path: ffmpeg-${{ matrix.name }}.tar.gz
         
   publish:
-    needs: build_and_test
+    needs: build
 
     if: ${{ github.repository == 'homebridge/homebridge' }}
 
