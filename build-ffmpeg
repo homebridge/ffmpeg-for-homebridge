@@ -338,8 +338,8 @@ if build "zlib"; then
 fi
 
 if build "openssl"; then
-	download "https://www.openssl.org/source/openssl-3.0.2.tar.gz" "openssl-3.0.2.tar.gz"
-	cd $PACKAGES/openssl-3.0.2 || exit
+	download "https://www.openssl.org/source/openssl-1.1.1m.tar.gz" "openssl-1.1.1m.tar.gz"
+	cd $PACKAGES/openssl-1.1.1m || exit
 	execute ./config --prefix=${WORKSPACE} --openssldir=${WORKSPACE} --with-zlib-include=${WORKSPACE}/include/ --with-zlib-lib=${WORKSPACE}/lib no-shared zlib
 	execute make -j $MJOBS
 	execute make install
