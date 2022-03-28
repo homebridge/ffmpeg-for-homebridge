@@ -61,10 +61,10 @@ jobs:
             os: macOS-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Cache Workspace
       id: cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: build
         key: ${{ matrix.name }}-cache
@@ -104,15 +104,15 @@ jobs:
         tar -C package -zcvf ffmpeg-${{ matrix.name }}.tar.gz .
 
     - name: Upload Asset
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
         name: ffmpeg-${{ matrix.name }}
         path: ffmpeg-${{ matrix.name }}.tar.gz
-        
+
   publish:
     needs: build
 
-    if: ${{ github.repository == 'homebridge/homebridge' }}
+    if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' && github.branches == 'master' && github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')}}
 
     uses: homebridge/.github/.github/workflows/npm-publish.yml@main
     secrets:
