@@ -61,10 +61,6 @@ jobs:
             TARGET_OS: alpine
           - name: darwin-x86_64
             os: macOS-latest
-          - name: win64
-            os: windows-latest
-          - name: win32
-            os: windows-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -102,13 +98,6 @@ jobs:
       run: |
         mkdir -p build
         cd build && SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg --build
-    
-    # windows Build
-    - name: Windows - Build static ffmpeg binary
-      if: runner.os == 'Windows'
-      run: |
-        mkdir -p build
-        cd build && SKIPINSTALL=yes VERBOSE=yes ../cross_compile_ffmpeg.sh
 
     - name: Prepare Asset
       run: |
