@@ -35,7 +35,7 @@ function ensureFfmpegCacheDir() {
   }
 }
 
-function getDownloadFileName() {
+async function getDownloadFileName() {
   switch (os.platform()) {
     case 'darwin':
       if (parseInt(os.release()) >= 18) {
@@ -65,7 +65,7 @@ function getDownloadFileName() {
           default:
             return null;
         }
-      } else if (detectLibc.family === detectLibc.MUSL) {
+      } else if (await detectLibc.family() === detectLibc.MUSL) {
         // probably alpine linux
         switch (process.arch) {
           case 'x64': 
@@ -77,7 +77,7 @@ function getDownloadFileName() {
           default:
             return null;
         }
-      } else if (detectLibc.family === detectLibc.GLIBC) {
+      } else if (await detectLibc.family() === detectLibc.GLIBC) {
         switch (process.arch) {
           case 'x64':
             return 'ffmpeg-debian-x86_64.tar.gz';
@@ -165,7 +165,7 @@ async function install() {
   ensureFfmpegCacheDir();
 
   // work out the download file name for the current platform
-  const ffmpegDownloadFileName = getDownloadFileName();
+  const ffmpegDownloadFileName = await getDownloadFileName();
 
   if (!ffmpegDownloadFileName) {
     if (os.platform() === 'darwin' && parseInt(os.release()) < 18) {
