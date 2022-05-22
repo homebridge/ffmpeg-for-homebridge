@@ -188,8 +188,8 @@ if build "yasm"; then
 fi
 
 if build "nasm"; then
-	download "https://www.nasm.us/pub/nasm/releasebuilds/2.15/nasm-2.15.tar.gz" "nasm.tar.gz"
-	cd $PACKAGES/nasm-2.15 || exit
+	download "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.xz" "nasm.tar.gz"
+	cd $PACKAGES/nasm-2.15.05 || exit
 	execute ./configure --prefix=${WORKSPACE} --disable-shared --enable-static
 	execute make -j $MJOBS
 	execute make install
@@ -206,8 +206,8 @@ if build "opencore"; then
 fi
 
 if build "libvpx"; then
-    download "https://github.com/webmproject/libvpx/archive/v1.8.1.tar.gz" "libvpx-1.8.1.tar.gz"
-    cd $PACKAGES/libvpx-1.8.1 || exit
+    download "https://github.com/webmproject/libvpx/archive/refs/tags/v1.10.0.tar.gz" "libvpx-1.10.0.tar.gz"
+    cd $PACKAGES/libvpx-1.10.0 || exit
 
     if [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Applying Darwin patch"
@@ -215,7 +215,7 @@ if build "libvpx"; then
         sed "s/-Wl,--no-undefined -Wl,-soname/-Wl,-undefined,error -Wl,-install_name/g" build/make/Makefile.patched > build/make/Makefile
     fi
 
-	execute ./configure --prefix=${WORKSPACE} --disable-unit-tests --disable-shared
+	execute ./configure --prefix=${WORKSPACE} --disable-unit-tests --disable-shared --as=yasm --enable-vp9-highbitdepth
 	execute make -j $MJOBS
 	execute make install
 	build_done "libvpx"
@@ -355,7 +355,7 @@ if build "openssl"; then
     fi
 	execute make -j $MJOBS
 	execute make install_sw
-	build_done "openssl"
+	build_done "openssl" "1.1.1m"
 fi
 
 if build "speex"; then
