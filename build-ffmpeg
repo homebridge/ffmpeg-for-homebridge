@@ -11,6 +11,7 @@ LDFLAGS="-L${WORKSPACE}/lib -lm"
 CFLAGS="-I${WORKSPACE}/include"
 PKG_CONFIG_PATH="${WORKSPACE}/lib/pkgconfig"
 ADDITIONAL_CONFIGURE_OPTIONS=""
+MACOS_M1=true
 
 if [ "$TARGET_OS" = "raspbian" ]; then
 	apt-get update
