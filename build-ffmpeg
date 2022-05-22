@@ -21,7 +21,6 @@ fi
 if [[ ("$(uname -m)" == "arm64") && ("$OSTYPE" == "darwin"*) ]]; then
   # If arm64 AND darwin (macOS)
   export ARCH=arm64
-  export MACOSX_DEPLOYMENT_TARGET=12.0
   MACOS_M1=true
 fi
 
