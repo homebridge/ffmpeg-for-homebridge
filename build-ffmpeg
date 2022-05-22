@@ -387,7 +387,7 @@ fi
 
 
 build "ffmpeg"
-download "https://ffmpeg.org/releases/ffmpeg-5.0.tar.bz2" "ffmpeg-5.0.tar.bz2"
+download "https://ffmpeg.org/releases/ffmpeg-5.0.1.tar.bz2" "ffmpeg-5.0.1.tar.bz2"
 cd $PACKAGES/ffmpeg-5.0/ || exit
 ./configure $ADDITIONAL_CONFIGURE_OPTIONS \
     --pkgconfigdir="$WORKSPACE/lib/pkgconfig" \
