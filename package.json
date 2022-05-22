@@ -14,8 +14,6 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "check": "npm install && npm outdated",
-    "update": "ncu -u && npm update && npm install",
     "install": "node install.js"
   },
   "files": [
