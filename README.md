@@ -42,7 +42,7 @@ sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/late
 
 #### Windows:
 
-Download the `ffmpeg.exe` file from the [releases page](https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest).
+Not Supported
 
 ## Build Flags
 
@@ -121,4 +121,3 @@ sudo npm install -g --unsafe-perm homebridge-fake-camera-plugin
 ## Credits
 
 * Linux and macOS build script: [markus-perl/ffmpeg-build-script](https://github.com/markus-perl/ffmpeg-build-script)
-* Windows build script: [rdp/ffmpeg-windows-build-helpers](https://github.com/rdp/ffmpeg-windows-build-helpers)
