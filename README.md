@@ -121,4 +121,4 @@ sudo npm install -g --unsafe-perm homebridge-fake-camera-plugin
 ## Credits
 
 * Linux and macOS build script: [markus-perl/ffmpeg-build-script](https://github.com/markus-perl/ffmpeg-build-script)
-* Windows build script: [rdp/ffmpeg-windows-build-helpers](https://github.com/rdp/ffmpeg-windows-build-helpers)
+* Windows build script: [marierose147/ffmpeg_windows_exe_with_fdk_aac](https://github.com/marierose147/ffmpeg_windows_exe_with_fdk_aac)

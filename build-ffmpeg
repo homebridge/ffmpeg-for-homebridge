@@ -18,6 +18,12 @@ if [ "$TARGET_OS" = "raspbian" ]; then
 	EXTRA_FLAGS="--enable-omx-rpi --enable-mmal"
 fi
 
+if [[ ("$(uname -m)" == "arm64") && ("$OSTYPE" == "darwin"*) ]]; then
+  # If arm64 AND darwin (macOS)
+  export ARCH=arm64
+  MACOS_M1=true
+fi
+
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
 if [[ -n $NUMJOBS ]]; then
@@ -181,8 +187,8 @@ if build "yasm"; then
 fi
 
 if build "nasm"; then
-	download "https://www.nasm.us/pub/nasm/releasebuilds/2.15/nasm-2.15.tar.gz" "nasm.tar.gz"
-	cd $PACKAGES/nasm-2.15 || exit
+	download "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.xz" "nasm.tar.gz"
+	cd $PACKAGES/nasm-2.15.05 || exit
 	execute ./configure --prefix=${WORKSPACE} --disable-shared --enable-static
 	execute make -j $MJOBS
 	execute make install
@@ -199,8 +205,8 @@ if build "opencore"; then
 fi
 
 if build "libvpx"; then
-    download "https://github.com/webmproject/libvpx/archive/v1.8.1.tar.gz" "libvpx-1.8.1.tar.gz"
-    cd $PACKAGES/libvpx-1.8.1 || exit
+    download "https://github.com/webmproject/libvpx/archive/refs/tags/v1.10.0.tar.gz" "libvpx-1.10.0.tar.gz"
+    cd $PACKAGES/libvpx-1.10.0 || exit
 
     if [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Applying Darwin patch"
@@ -208,7 +214,7 @@ if build "libvpx"; then
         sed "s/-Wl,--no-undefined -Wl,-soname/-Wl,-undefined,error -Wl,-install_name/g" build/make/Makefile.patched > build/make/Makefile
     fi
 
-	execute ./configure --prefix=${WORKSPACE} --disable-unit-tests --disable-shared
+	execute ./configure --prefix=${WORKSPACE} --disable-unit-tests --disable-shared --as=yasm --enable-vp9-highbitdepth
 	execute make -j $MJOBS
 	execute make install
 	build_done "libvpx"
@@ -340,10 +346,15 @@ fi
 if build "openssl"; then
 	download "https://www.openssl.org/source/openssl-1.1.1m.tar.gz" "openssl-1.1.1m.tar.gz"
 	cd $PACKAGES/openssl-1.1.1m || exit
-	execute ./config --prefix=${WORKSPACE} --openssldir=${WORKSPACE} --with-zlib-include=${WORKSPACE}/include/ --with-zlib-lib=${WORKSPACE}/lib no-shared zlib
+	if $MACOS_M1; then
+      sed -n 's/\(##### GNU Hurd\)/"darwin64-arm64-cc" => { \n    inherit_from     => [ "darwin-common", asm("aarch64_asm") ],\n    CFLAGS           => add("-Wall"),\n    cflags           => add("-arch arm64 "),\n    lib_cppflags     => add("-DL_ENDIAN"),\n    bn_ops           => "SIXTY_FOUR_BIT_LONG", \n    perlasm_scheme   => "macosx", \n}, \n\1/g' Configurations/10-main.conf
+      execute ./Configure --prefix=${WORKSPACE} no-shared no-asm darwin64-arm64-cc
+    else
+      execute ./config --prefix=${WORKSPACE} --openssldir=${WORKSPACE} --with-zlib-include=${WORKSPACE}/include/ --with-zlib-lib=${WORKSPACE}/lib no-shared zlib
+    fi
 	execute make -j $MJOBS
-	execute make install
-	build_done "openssl"
+	execute make install_sw
+	build_done "openssl" "1.1.1m"
 fi
 
 if build "speex"; then
@@ -374,8 +385,8 @@ fi
 
 
 build "ffmpeg"
-download "https://ffmpeg.org/releases/ffmpeg-5.0.tar.bz2" "ffmpeg-5.0.tar.bz2"
-cd $PACKAGES/ffmpeg-5.0/ || exit
+download "https://ffmpeg.org/releases/ffmpeg-5.0.1.tar.bz2" "ffmpeg-5.0.1.tar.bz2"
+cd $PACKAGES/ffmpeg-5.0.1/ || exit
 ./configure $ADDITIONAL_CONFIGURE_OPTIONS \
     --pkgconfigdir="$WORKSPACE/lib/pkgconfig" \
     --prefix=${WORKSPACE} \
