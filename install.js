@@ -11,9 +11,11 @@ const get = require('simple-get');
 const mkdirp = require('mkdirp');
 const tar = require('tar');
 
-function getNpmPackageVersion() {
-  // return 'v' + process.env.npm_package_version;
-  return 'v0.0.11';
+/**
+ * This needs to be updated when doing a new release of ffmpeg binaries
+ */
+function targetFfmpegRelease() {
+  return 'v0.1.0';
 }
 
 function npmCache() {
@@ -177,10 +179,10 @@ async function install() {
   }
 
   // the file path where the download should go
-  const ffmpegDownloadPath = path.resolve(ffmpegCache(), getNpmPackageVersion() + '-' + ffmpegDownloadFileName);
+  const ffmpegDownloadPath = path.resolve(ffmpegCache(), targetFfmpegRelease() + '-' + ffmpegDownloadFileName);
 
   // construct the download url
-  const downloadUrl = `https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/${ffmpegDownloadFileName}`;
+  const downloadUrl = `https://github.com/homebridge/ffmpeg-for-homebridge/releases/download/${targetFfmpegRelease()}/${ffmpegDownloadFileName}`;
 
   // download if not cached
   if (!fs.existsSync(ffmpegDownloadPath)) {
