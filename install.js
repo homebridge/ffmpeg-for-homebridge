@@ -8,7 +8,6 @@ const child_process = require('child_process');
 const detectLibc = require('detect-libc');
 const dotenv = require('dotenv');
 const get = require('simple-get');
-const mkdirp = require('mkdirp');
 const tar = require('tar');
 
 /**
@@ -18,17 +17,12 @@ function targetFfmpegRelease() {
   return 'v0.1.0';
 }
 
-function npmCache() {
-  var env = process.env
-  return env.npm_config_cache || (env.APPDATA ? path.join(env.APPDATA, 'npm-cache') : path.join(os.homedir(), '.npm'))
-}
-
 function ffmpegCache() {
-  return path.join(npmCache(), '_ffmpeg_for_homebridge')
+  return path.join(__dirname, '.build');
 }
 
 function makeFfmpegCacheDir() {
-  mkdirp.sync(ffmpegCache())
+  fs.mkdirSync(ffmpegCache(), { recursive: true });
 }
 
 function ensureFfmpegCacheDir() {
@@ -219,7 +213,7 @@ async function install() {
 
   // no need to extract for windows - just copy the downloaded binary to the temp path on windows
   if (os.platform() === 'win32') {
-    fs.copyFileSync(ffmpegDownloadPath, ffmpegTempPath)
+    fs.renameSync(ffmpegDownloadPath, ffmpegTempPath)
   }
 
   // check if the downloaded binary works
@@ -233,7 +227,7 @@ async function install() {
   };
 
   // move the binary to the npm package directory
-  fs.copyFileSync(ffmpegTempPath, ffmpegTargetPath);
+  fs.renameSync(ffmpegTempPath, ffmpegTargetPath);
 
   console.log(`\x1b[36m\nffmpeg has been downloaded to ${ffmpegTargetPath}\x1b[0m`);
   console.log(`\x1b[37mThank you for using \x1b[4mhttps://github.com/homebridge/ffmpeg-for-homebridge\x1b[0m\n`);
