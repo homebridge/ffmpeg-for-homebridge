@@ -87,6 +87,13 @@ async function getDownloadFileName() {
       } else {
         return null;
       }
+    case 'freebsd':
+      switch (process.arch) {
+        case 'x64':
+          return 'ffmpeg-freebsd-x86_64.tar.gz';
+        default:
+          return null;
+      }
     case 'win32':
       // only x64 is supported
       if (process.arch === 'x64') {
