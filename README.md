@@ -1,43 +1,41 @@
 [![Build ffmpeg](https://github.com/homebridge/ffmpeg-for-homebridge/workflows/Build%20ffmpeg/badge.svg)](https://github.com/homebridge/ffmpeg-for-homebridge/actions)
 [![GitHub All Releases](https://img.shields.io/github/downloads/homebridge/ffmpeg-for-homebridge/total)](https://somsubhra.com/github-release-stats/?username=homebridge&repository=ffmpeg-for-homebridge)
 
-# ffmpeg for homebridge
+# FFmpeg for homebridge
 
-This project provides static `ffmpeg` binaries for multiple platforms and architectures for use with [Homebridge](https://github.com/nfarina/homebridge).
+This project provides static FFmpeg binaries for multiple platforms and architectures for use with [Homebridge](https://homebridge.io).
 
 * Audio support using `libfdk-aac`
-* Hardware decoding on the Raspberry Pi using `h264_omx`
+* Hardware-accelerated encoding support on Intel platforms using `h264_qsv` and hardware-accelerated encoding on Raspberry Pi 3+  using `h264_v4l2m2m`
 
 ## Supported Platforms
 
-| OS                              | Supported Architectures |
-|---------------------------------|-------------------------|
-| Raspbian Linux (9+)             | armv6l (armv7l)         |
-| Debian/Ubuntu Linux             | x86_64, armv7l, aarch64 |
-| Alpine Linux                    | x86_64, armv6l, aarch64 |
-| macOS (10.14 "Mojave" or newer) | x86_64                  |
-| Windows 10<sup>*</sup>          | x86_64                  |
-
-<sup>*</sup> Not all codecs are supported on Windows 10.
+| OS                                  | Supported Architectures |
+|-------------------------------------|-------------------------|
+| FreeBSD                             | x86_64                  |
+| Linux                               | x86_64, armv6l, aarch64 |
+| macOS (10.14 (Mojave) or newer)     | x86_64                  |
+| Raspberry Pi 3 or better (Raspbian) | armv7l                  |
+| Windows 10 or newer                 | x86_64                  |
 
 ## Install
 
-#### Raspbian Linux:
+#### Raspbian or ARMv7-based Linux environments:
 
 ```
-sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-raspbian-armv6l.tar.gz | sudo tar xzf - -C / --no-same-owner
+sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-alpine-arm32v7.tar.gz | sudo tar xzf - -C / --no-same-owner
 ```
 
-#### Debian / Ubuntu Linux:
+#### x64 or arm64 Linux:
 
 ```
-sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-debian-$(uname -m).tar.gz | sudo tar xzf - -C / --no-same-owner
+sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-alpine-$(uname -m).tar.gz | sudo tar xzf - -C / --no-same-owner
 ```
 
-#### macOS:
+#### Intel or Apple Silicon macOS:
 
 ```
-sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-darwin-x86_64.tar.gz | sudo tar xzfm - -C / --no-same-owner
+sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-darwin-$(uname -m).tar.gz | sudo tar xzfm - -C / --no-same-owner
 ```
 
 #### Windows:
@@ -49,37 +47,39 @@ Download the `ffmpeg.exe` file from the [releases page](https://github.com/homeb
 The `ffmpeg` binary is built with the following options enabled:
 
 ```bash
-  --enable-static
-  --disable-debug
-  --disable-shared
-  --disable-ffplay
-  --disable-doc
-  --enable-openssl
-  --enable-gpl
-  --enable-version3
-  --enable-nonfree
-  --enable-pthreads
-  --enable-libvpx
-  --enable-libmp3lame
-  --enable-libspeex
-  --enable-libopus
-  --enable-libtheora
-  --enable-libvorbis
-  --enable-libx264
-  --enable-runtime-cpudetect
-  --enable-libfdk-aac
-  --enable-avfilter
-  --enable-libopencore_amrwb
-  --enable-libopencore_amrnb
-  --enable-filters
-  --enable-decoder=h264
-  --enable-network
-  --enable-protocol=tcp
-  --enable-demuxer=rtsp
-  --enable-indev=alsa           # Linux Only
-  --enable-outdev=alsa          # Linux Only
-  --enable-omx-rpi              # Raspbian Linux builds only
-  --enable-mmal                 # Raspbian Linux builds only
+    --enable-hardcoded-tables
+    --enable-nonfree
+    --enable-gpl
+    --enable-hardcoded-tables
+    --enable-hardcoded-tables
+    --enable-openssl
+    --enable-libdav1d
+    --enable-libsvtav1
+    --enable-libx264
+    --enable-libx265
+    --enable-libvpx
+    --enable-libxvid
+    --enable-libvidstab
+    --enable-libaom
+    --enable-libzimg
+    --enable-lv2
+    --enable-libopencore_amrnb
+    --enable-libopencore_amrwb
+    --enable-libmp3lame
+    --enable-libopus
+    --enable-libvorbis
+    --enable-libtheora
+    --enable-libfdk-aac
+    --enable-libwebp
+    --enable-libsrt
+    --enable-libvpl                      # x86_64 Linux and Windows only
+    --disable-ffnvcodec
+    --enable-amf
+    --disable-debug
+    --disable-shared
+    --enable-pthreads
+    --enable-static
+    --enable-version3
   ```
 
 ## Issues
@@ -90,9 +90,9 @@ Issues strictly related to the compatibility or installation of the resulting bi
 
 ## Plugin Dependency
 
-**This section is for Homebridge Plugin developers only, if you need to install `ffmpeg` see the instructions above.**
+**This section is for Homebridge Plugin developers only, if you need to install FFmpeg see the instructions above.**
 
-You can optionally include this package as a dependency in your Homebridge camera plugins, by doing this the correct `ffmpeg` binary will automatically be downloaded to your user's server when they install your plugin.
+You can optionally include this package as a dependency in your Homebridge camera plugins, by doing this the correct FFmpeg binary will automatically be downloaded to your user's server when they install your plugin.
 
 ```
 npm install --save ffmpeg-for-homebridge
@@ -105,11 +105,11 @@ var pathToFfmpeg = require('ffmpeg-for-homebridge');
 // .ts
 import pathToFfmpeg from 'ffmpeg-for-homebridge';
 
-// fallback to system ffmpeg (replace this with your own ffmpeg spawn command)
+// fallback to system FFmpeg (replace this with your own ffmpeg spawn command)
 child_process.spawn(pathToFfmpeg || 'ffmpeg', []);
 ```
 
-If `ffmpeg` is not supported on the user's platform, or this package failed to download the `ffmpeg` binary, the package will return `undefined`, you should check for this and and try and use `ffmpeg` from the user's `PATH` instead.
+If a supported version of FFmpeg is unavailable for the user's platform, or this package failed to download the FFmpeg binary, the package will return `undefined`, you should check for this and and try and use FFmpeg from the user's `PATH` instead.
 
 You will need to update your plugin's README installation command to include the `--unsafe-perm` flag. For example:
 

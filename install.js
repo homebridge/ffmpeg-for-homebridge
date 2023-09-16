@@ -1,146 +1,159 @@
 #!/usr/bin/env node
 
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const child_process = require('child_process');
+const os = require("os");
+const fs = require("fs");
+const path = require("path");
+const child_process = require("child_process");
 
-const detectLibc = require('detect-libc');
-const dotenv = require('dotenv');
-const get = require('simple-get');
-const tar = require('tar');
+const dotenv = require("dotenv");
+const get = require("simple-get");
+const tar = require("tar");
 
-/**
- * This needs to be updated when doing a new release of ffmpeg binaries
- */
 function targetFfmpegRelease() {
-  return 'v0.1.0';
+
+  return "v" + process.env.npm_package_version;
 }
 
 function ffmpegCache() {
-  return path.join(__dirname, '.build');
+
+  return path.join(__dirname, ".build");
 }
 
 function makeFfmpegCacheDir() {
+
   fs.mkdirSync(ffmpegCache(), { recursive: true });
 }
 
 function ensureFfmpegCacheDir() {
+
   if (!fs.existsSync(ffmpegCache())) {
-    return makeFfmpegCacheDir()
+
+    return makeFfmpegCacheDir();
   }
 }
 
 async function getDownloadFileName() {
+
   switch (os.platform()) {
-    case 'darwin':
+
+    case "darwin":
+
       if (parseInt(os.release()) >= 18) {
+
         switch (process.arch) {
-          case 'x64':
-            return 'ffmpeg-darwin-x86_64.tar.gz';
-          case 'arm64':
-            return 'ffmpeg-darwin-arm64.tar.gz';
+
+          case "x64":
+
+            return "ffmpeg-darwin-x86_64.tar.gz";
+
+          case "arm64":
+
+            return "ffmpeg-darwin-arm64.tar.gz";
+
           default:
             return null;
         }
-      }
-    case 'linux':
-      let osReleaseEnv = {};
-      if (fs.existsSync('/etc/os-release')) {
-        osReleaseEnv = dotenv.parse(fs.readFileSync('/etc/os-release'));
       }
 
-      if (osReleaseEnv.ID === 'raspbian') {
-        switch (process.arch) {
-          case 'x64':
-            return 'ffmpeg-debian-x86_64.tar.gz';
-          case 'arm':
-            return 'ffmpeg-raspbian-armv6l.tar.gz';
-          case 'arm64':
-            return 'ffmpeg-debian-aarch64.tar.gz';
-          default:
-            return null;
-        }
-      } else if (await detectLibc.family() === detectLibc.MUSL) {
-        // probably alpine linux
-        switch (process.arch) {
-          case 'x64': 
-            return 'ffmpeg-alpine-x86_64.tar.gz';
-          case 'arm':
-            return 'ffmpeg-alpine-armv6l.tar.gz';
-          case 'arm64':
-            return 'ffmpeg-alpine-aarch64.tar.gz';
-          default:
-            return null;
-        }
-      } else if (await detectLibc.family() === detectLibc.GLIBC) {
-        switch (process.arch) {
-          case 'x64':
-            return 'ffmpeg-debian-x86_64.tar.gz';
-          case 'arm':
-            return 'ffmpeg-debian-armv7l.tar.gz';
-          case 'arm64':
-            return 'ffmpeg-debian-aarch64.tar.gz';
-          default:
-            return null;
-        }
-      } else {
-        return null;
+    case "linux":
+
+      let osReleaseEnv = {};
+
+      if (fs.existsSync("/etc/os-release")) {
+
+        osReleaseEnv = dotenv.parse(fs.readFileSync("/etc/os-release"));
       }
-    case 'freebsd':
+
       switch (process.arch) {
-        case 'x64':
-          return 'ffmpeg-freebsd-x86_64.tar.gz';
+
+        case "x64": 
+
+          return "ffmpeg-alpine-x86_64.tar.gz";
+
+        case "arm":
+
+          return "ffmpeg-alpine-arm32v7.tar.gz";
+
+        case "arm64":
+
+          return "ffmpeg-alpine-aarch64.tar.gz";
+
         default:
+
           return null;
       }
-    case 'win32':
-      // only x64 is supported
-      if (process.arch === 'x64') {
-        return 'ffmpeg.exe'
-      } else {
-        return null;
+
+    case "freebsd":
+
+      switch (process.arch) {
+
+        case "x64":
+
+          return "ffmpeg-freebsd-x86_64.tar.gz";
+
+        default:
+
+          return null;
       }
+
+    case "win32":
+
+      if (process.arch === "x64") {
+
+        return "ffmpeg.exe"
+      } 
+
+      return null;
+
     default:
+
       return null;
   }
 }
 
 async function downloadFfmpeg(downloadUrl, ffmpegDownloadPath) {
+
   // open write stream to download location
-  const tempFile = path.resolve(ffmpegCache(), '.download');
+  const tempFile = path.resolve(ffmpegCache(), ".download");
   const file = fs.createWriteStream(tempFile);
 
-  console.log(`Downloading ffmpeg from ${downloadUrl}`);
+  console.log("Downloading FFmpeg from: %s", downloadUrl);
 
   return new Promise((resolve, reject) => {
+
     get({
       url: downloadUrl,
     }, (err, res) => {
+
       if (err || res.statusCode !== 200) {
+
         return reject(err);
       }
 
-      const totalBytes = parseInt(res.headers['content-length'], 10);
+      const totalBytes = parseInt(res.headers["content-length"], 10);
       let downloadedBytes = 0;
 
-      res.on('data', (chunk) => {
+      res.on("data", (chunk) => {
+
         downloadedBytes = downloadedBytes + chunk.length;
-        const percent = Math.round((downloadedBytes / totalBytes) * 100) + '%';
+        const percent = Math.round((downloadedBytes / totalBytes) * 100) + "%";
         process.stdout.write("\r" + percent);
       });
       
-      file.on('finish', () => {
-        console.log(' - Download Complete');
+      file.on("finish", () => {
+
+        console.log(" - Download Complete");
         file.close();
       });
 
-      file.on('close', () => {
+      file.on("close", () => {
+
         fs.renameSync(tempFile, ffmpegDownloadPath);
         resolve();
       })
 
-      file.on('error', (error) => {
+      file.on("error", (error) => {
+
         console.log(error);
         reject(error)
       });
@@ -151,19 +164,25 @@ async function downloadFfmpeg(downloadUrl, ffmpegDownloadPath) {
 }
 
 function binaryOk(ffmpegTempPath) {
+
   try {
-    child_process.execSync(ffmpegTempPath + ' -buildconf');
+
+    child_process.execSync(ffmpegTempPath + " -buildconf");
     return true;
   } catch (e) {
+
     return false;
   }
 }
 
 function displayErrorMessage() {
-  console.log(`\n\x1b[36mThe homebridge plugin has been installed, however you may need to install ffmpeg separately.\x1b[0m\n`);
+
+  console.log("\n\x1b[36mThe homebridge plugin has been installed, however you may need to install FFmpeg separately.\x1b[0m\n");
 }
 
+// Attempt to install a working version of FFmpeg for the system we are running on.
 async function install() {
+
   // ensure the ffmpeg npm cache directory exists
   ensureFfmpegCacheDir();
 
@@ -171,40 +190,49 @@ async function install() {
   const ffmpegDownloadFileName = await getDownloadFileName();
 
   if (!ffmpegDownloadFileName) {
-    if (os.platform() === 'darwin' && parseInt(os.release()) < 18) {
-      console.log(`ffmpeg-for-homebridge: macOS versions older than 10.14 "Mojave" are not supported, you will need to install/compile ffmpeg manually.`);
+
+    if (os.platform() === "darwin" && parseInt(os.release()) < 18) {
+
+      console.log("ffmpeg-for-homebridge: macOS versions older than 10.14 (Mojave) are not supported, you will need to install a working version of FFmpeg manually.");
     } else {
-      console.log(`ffmpeg-for-homebridge: ${os.platform()} ${process.arch} is not supported, you will need to install/compile ffmpeg manually.`);
+
+      console.log("ffmpeg-for-homebridge: %s %s is not supported, you will need to install a working version of FFmpeg manually.", os.platform, process.arch);
     }
+
     process.exit(0);
   }
 
   // the file path where the download should go
-  const ffmpegDownloadPath = path.resolve(ffmpegCache(), targetFfmpegRelease() + '-' + ffmpegDownloadFileName);
+  const ffmpegDownloadPath = path.resolve(ffmpegCache(), targetFfmpegRelease() + "-" + ffmpegDownloadFileName);
 
   // construct the download url
-  const downloadUrl = `https://github.com/homebridge/ffmpeg-for-homebridge/releases/download/${targetFfmpegRelease()}/${ffmpegDownloadFileName}`;
+  const downloadUrl = "https://github.com/homebridge/ffmpeg-for-homebridge/releases/download/" + targetFfmpegRelease() + "/" + ffmpegDownloadFileName;
 
   // download if not cached
   if (!fs.existsSync(ffmpegDownloadPath)) {
+
     await downloadFfmpeg(downloadUrl, ffmpegDownloadPath);
   }
 
   // contruct the path of the temporary ffmpeg binary
-  const ffmpegTempPath = path.resolve(ffmpegCache(), os.platform() === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
-  const ffmpegTargetPath = path.resolve(__dirname, os.platform() === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
+  const ffmpegTempPath = path.resolve(ffmpegCache(), os.platform() === "win32" ? "ffmpeg.exe" : "ffmpeg");
+  const ffmpegTargetPath = path.resolve(__dirname, os.platform() === "win32" ? "ffmpeg.exe" : "ffmpeg");
 
   // extract ffmpeg binary from the downloaded tar.gz on non-windows platforms
-  if (os.platform() !== 'win32') {
+  if (os.platform() !== "win32") {
+
     try {
+
       await tar.x({
+
         file: ffmpegDownloadPath,
         C: ffmpegCache(),
         strip: 4, // tar.gz packs ffmpeg into /usr/local/bin - this strips that out
       });
     } catch (e) {
+
       console.error(e);
-      console.error('An error occured while extracting the downloaded ffmpeg binary.');
+      console.error("An error occured while extracting the downloaded ffmpeg binary.");
       displayErrorMessage();
       
       // delete the cached download if it failed to extract
@@ -214,17 +242,20 @@ async function install() {
     }
 
     if (fs.existsSync(ffmpegTempPath)) {
+
       fs.chmodSync(ffmpegTempPath, 0o755);
     }
   }
 
   // no need to extract for windows - just copy the downloaded binary to the temp path on windows
-  if (os.platform() === 'win32') {
+  if (os.platform() === "win32") {
+
     fs.renameSync(ffmpegDownloadPath, ffmpegTempPath)
   }
 
   // check if the downloaded binary works
   if (!binaryOk(ffmpegTempPath)) {
+
     displayErrorMessage();
     
     // delete the cached download if it failed the test
@@ -236,19 +267,28 @@ async function install() {
   // move the binary to the npm package directory
   fs.renameSync(ffmpegTempPath, ffmpegTargetPath);
 
-  console.log(`\x1b[36m\nffmpeg has been downloaded to ${ffmpegTargetPath}\x1b[0m`);
-  console.log(`\x1b[37mThank you for using \x1b[4mhttps://github.com/homebridge/ffmpeg-for-homebridge\x1b[0m\n`);
+  console.log("\x1b[36m\nFFmpeg has been downloaded to %s.\x1b[0m", ffmpegTargetPath);
 }
 
+// Bootstrap the installation process.
 async function bootstrap() {
+
+  console.log("Building for version: %s", targetFfmpegRelease());
+
   try {
+
     await install();
   } catch (e) {
-    if (e && e.code && e.code === 'EACCES') {
-      console.log(`Failed to download ffmpeg binary.\nIf you are installing this plugin as a global module (-g) make sure you add the --unsafe-perm flag to the install command.`);
+
+    if (e && e.code && e.code === "EACCES") {
+
+      console.log("Unable to download FFmpeg.\nIf you are installing this plugin as a global module (-g) make sure you add the --unsafe-perm flag to the install command.");
     }
+
     displayErrorMessage();
+
     setTimeout(() => {
+
       process.exit(0);
     });
   }
