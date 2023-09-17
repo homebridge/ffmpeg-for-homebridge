@@ -63,8 +63,6 @@ FFmpeg is built with the following configuration options:
     --enable-amf                         # x86_64 Linux only
     --enable-gpl
     --enable-hardcoded-tables
-    --enable-hardcoded-tables
-    --enable-hardcoded-tables
     --enable-libaom                      # x86_64 Linux only
     --enable-libdav1d
     --enable-libfdk-aac
