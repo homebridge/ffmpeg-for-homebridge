@@ -1,0 +1,20 @@
+ARG BASE_IMAGE
+ARG EMULATE_ARCH=aarch64
+
+FROM --platform=amd64 multiarch/qemu-user-static:x86_64-${EMULATE_ARCH} as qemu
+FROM --platform=amd64 ${BASE_IMAGE}
+ARG EMULATE_ARCH
+
+COPY --from=qemu /usr/bin/qemu-${EMULATE_ARCH}-static /usr/bin
+COPY prepare-build /
+
+RUN /prepare-build
+
+COPY build-ffmpeg /
+
+ENV SKIPINSTALL=yes VERBOSE=yes
+
+VOLUME /build
+WORKDIR /build
+
+CMD /build-ffmpeg --build --enable-gpl-and-non-free --full-static

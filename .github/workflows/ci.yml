@@ -1,0 +1,57 @@
+# ci.yml: Continuous integration workflow.
+#
+name: 'Continuous integration'
+
+on:
+  pull_request:
+  push:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+jobs:
+
+  # Run a validation build on LTS versions of node.
+  build:
+    name: 'Build package'
+
+    # Create the build matrix for all the environments we're validating against.
+    strategy:
+      matrix:
+        node-version: [ lts/-1, lts/* ]
+        os: [ ubuntu-latest ]
+
+    # Specify the environments we're going to build in.
+    runs-on: ${{ matrix.os }}
+
+    # Execute the build activities.
+    steps:
+      - name: Checkout the repository.
+        uses: actions/checkout@v3
+
+      - name: Setup the node ${{ matrix.node-version }} environment.
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build and install the package with a clean slate.
+        run: |
+          npm ci
+          npm run build --if-present
+        env:
+          CI: true
+
+  publish:
+    name: 'Publish package'
+
+    # Publish only if we've received a release event and the tag starts with "v" (aka v1.2.3).
+    if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
+
+    # Ensure we have a successful build first.
+    needs: build
+
+    # Publish.
+    uses: homebridge/.github/.github/workflows/npm-publish.yml@main
+    secrets:
+      npm_auth_token: ${{ secrets.npm_token }}
+

@@ -1,39 +1,43 @@
 ARG BASE_IMAGE
-FROM ${BASE_IMAGE:-library/ubuntu:19.04}
+
+FROM --platform=amd64 ${BASE_IMAGE:-ubuntu:latest}
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y \
-    wget \
-    ed \
-    subversion \
-    curl \
-    texinfo \
-    g++ \
-    bison \
-    flex \
-    cvs \
-    yasm \
-    automake \
-    libtool \
     autoconf \
-    gcc \
-    cmake \
-    git \
-    make \
-    pkg-config \
-    zlib1g-dev \
-    mercurial \
-    unzip \
-    pax \
-    nasm \
-    meson \
-    gperf \
-    autogen \
-    bzip2 \
     autoconf-archive \
+    autogen \
+    automake \
+    bison \
+    bzip2 \
+    clang \
+    cmake \
+    curl \
+    cvs \
+    ed \
+    flex \
+    g++ \
+    gcc \
+    git \
+    gperf \
+    libtool \
+    make \
+    meson \
+    nasm \
     p7zip-full \
+    pax \
+    pkg-config \
+    python-is-python3 \
+    python3 \
+    python3-setuptools \
     ragel \
-    python3-distutils
+    subversion \
+    texinfo \
+    unzip \
+    wget \
+    yasm \
+    zlib1g-dev
 
 RUN git clone https://github.com/rdp/ffmpeg-windows-build-helpers.git /ffmpeg-windows-build-helpers
 
@@ -41,8 +45,8 @@ WORKDIR /ffmpeg-windows-build-helpers
 
 ENV OUTPUTDIR=/build
 
-CMD ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=y --build-ffmpeg-static=y --disable-nonfree=n --build-intel-qsv=y --compiler-flavors=win64 --enable-gpl=y --high-bitdepth=n \
-  && mkdir -p $OUTPUTDIR/workspace/bin \
-  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffmpeg.exe $OUTPUTDIR/workspace/bin/ffmpeg \
-  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffprobe.exe $OUTPUTDIR/workspace/bin/ffprobe \
-  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffplay.exe $OUTPUTDIR/workspace/bin/ffplay
+CMD ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=n --build-ffmpeg-static=y --disable-nonfree=n --build-intel-qsv=y --compiler-flavors=win64 --enable-gpl=y \
+  && mkdir -p $OUTPUTDIR \
+  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffmpeg.exe $OUTPUTDIR/ffmpeg.exe \
+  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffprobe.exe $OUTPUTDIR/ffprobe.exe \
+  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffplay.exe $OUTPUTDIR/ffplay.exe
