@@ -17,16 +17,17 @@ Specifically, we provide:
 
 * Audio support using `libfdk-aac`
 * Hardware-accelerated encoding support on Intel platforms using `h264_qsv` and hardware-accelerated encoding on Raspberry Pi 3+ using `h264_v4l2m2m`
+* Hardware-accelerated encoding support on Apple platforms using `videotoolbox`
 
 ## Supported Platforms
 
-| OS                                  | Supported Architectures |
-|-------------------------------------|-------------------------|
-| FreeBSD                             | x86_64                  |
-| Linux                               | x86_64, armv6l, aarch64 |
-| macOS (10.14 (Mojave) or newer)     | x86_64                  |
-| Raspberry Pi 3 or better (Raspbian) | armv7l, aarch64         |
-| Windows 10 or newer                 | x86_64                  |
+| OS                                  | Supported Architectures        |
+|-------------------------------------|--------------------------------|
+| FreeBSD                             | x86_64                         |
+| Linux                               | x86_64, armv7l, aarch64        |
+| macOS (10.14 (Mojave) or newer)     | x86_64, arm64 (Apple Silicon)  |
+| Raspberry Pi 3 or better (Raspbian) | armv7l, aarch64                |
+| Windows 10 or newer                 | x86_64                         |
 
 ## Install
 
@@ -129,5 +130,6 @@ sudo npm install -g --unsafe-perm homebridge-fake-camera-plugin
 
 ## Credits
 
+* FreeBSD build script: [hjdhjd/build-ffmpeg](https://github.com/hjdhjd/build-ffmpeg)
 * Linux and macOS build script: [markus-perl/ffmpeg-build-script](https://github.com/markus-perl/ffmpeg-build-script)
 * Windows build script: [rdp/ffmpeg-windows-build-helpers](https://github.com/rdp/ffmpeg-windows-build-helpers)
