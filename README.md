@@ -31,7 +31,7 @@ Specifically, we provide:
 
 ## Install
 
-#### Raspbian or ARMv7-based Linux environments:
+#### Raspbian or armv7/armv8-based Linux environments:
 
 ```
 sudo curl -Lf# https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-alpine-arm32v7.tar.gz | sudo tar xzf - -C / --no-same-owner
