@@ -51,7 +51,7 @@ jobs:
     needs: build
 
     # Publish.
-    uses: homebridge/.github/.github/workflows/npm-publish.yml@main
+    uses: homebridge/.github/.github/workflows/npm-publish.yml@latest
     secrets:
       npm_auth_token: ${{ secrets.npm_token }}
 
