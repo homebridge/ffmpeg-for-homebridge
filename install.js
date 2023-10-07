@@ -38,7 +38,7 @@ async function getDownloadFileName() {
 
     case "darwin":
 
-      if (parseInt(os.release()) >= 18) {
+      if (parseInt(os.release()) >= 22) {
 
         switch (process.arch) {
 
@@ -191,9 +191,9 @@ async function install() {
 
   if (!ffmpegDownloadFileName) {
 
-    if (os.platform() === "darwin" && parseInt(os.release()) < 18) {
+    if (os.platform() === "darwin" && parseInt(os.release()) < 22) {
 
-      console.log("ffmpeg-for-homebridge: macOS versions older than 10.14 (Mojave) are not supported, you will need to install a working version of FFmpeg manually.");
+      console.log("ffmpeg-for-homebridge: macOS versions older than 13 (Ventura) are not supported, you will need to install a working version of FFmpeg manually.");
     } else {
 
       console.log("ffmpeg-for-homebridge: %s %s is not supported, you will need to install a working version of FFmpeg manually.", os.platform, process.arch);
