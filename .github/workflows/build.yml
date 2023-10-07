@@ -20,7 +20,7 @@ jobs:
           alpine-aarch64,
           alpine-arm32v7,
           alpine-x86_64,
-          darwin-arm64,
+#          darwin-arm64,
           darwin-x86_64,
           windows-x86_64
         ]
@@ -55,8 +55,8 @@ jobs:
             TARGET_OS: alpine
 
           # Build for Apple Silicon macOS environments.
-          - name: darwin-arm64
-            os: macos-13-large
+#          - name: darwin-arm64
+#            os: macos-13-large
 
           # Build for Intel macOS environments.
           - name: darwin-x86_64
