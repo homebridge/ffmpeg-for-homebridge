@@ -508,7 +508,7 @@ fi
 
 if build "giflib" "5.2.1"; then
 
-  download "https://netcologne.dl.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz"
+  download "https://downloads.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz"
 
   if [[ "${TARGET_OS}" == "darwin" ]]; then
 
@@ -870,7 +870,7 @@ EOF
 
     if [ -n "${LDEXEFLAGS}" ]; then
 
-      sed -i.backup 's/-lgcc_s/-lgcc_eh/g' "${WORKSPACE}/lib/pkgconfig/x265.pc" # The -i.backup is intended and required on MacOS: https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
+      sed -i.backup 's/-lgcc_s/-lgcc_eh/g' "${WORKSPACE}/lib/pkgconfig/x265.pc" # The -i.backup is intended and required on macOS: https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
     fi
 
     build_done "x265" "latest"
@@ -887,8 +887,8 @@ if build "libvpx" "1.13.0"; then
   if [[ "${TARGET_OS}" == "darwin" ]]; then
 
     echo "Applying Darwin patch"
-    sed "s/,--version-script//g" build/make/Makefile >build/make/Makefile.patched
-    sed "s/-Wl,--no-undefined -Wl,-soname/-Wl,-undefined,error -Wl,-install_name/g" build/make/Makefile.patched >build/make/Makefile
+    sed "s/,--version-script//g" build/make/Makefile > build/make/Makefile.patched
+    sed "s/-Wl,--no-undefined -Wl,-soname/-Wl,-undefined,error -Wl,-install_name/g" build/make/Makefile.patched > build/make/Makefile
   fi
 
   execute ./configure --prefix="${WORKSPACE}" --disable-unit-tests --disable-shared --disable-examples --as=yasm --enable-vp9-highbitdepth
@@ -1036,7 +1036,7 @@ if command_exists "python3"; then
 
       if build "pcre" "8.45"; then
 
-        download "https://altushost-swe.dl.sourceforge.net/project/pcre/pcre/8.45/pcre-8.45.tar.gz" "pcre-8.45.tar.gz"
+        download "https://downloads.sourceforge.net/project/pcre/pcre/8.45/pcre-8.45.tar.gz" "pcre-8.45.tar.gz"
 
         execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
         execute make -j ${MJOBS}
@@ -1089,7 +1089,7 @@ if ! isLinux; then
 
   if build "opencore" "0.1.6"; then
 
-    download "https://netactuate.dl.sourceforge.net/project/opencore-amr/opencore-amr/opencore-amr-0.1.6.tar.gz" "opencore-amr-0.1.6.tar.gz"
+    download "https://downloads.sourceforge.net/project/opencore-amr/opencore-amr/opencore-amr-0.1.6.tar.gz" "opencore-amr-0.1.6.tar.gz"
 
     execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
     execute make -j ${MJOBS}
@@ -1105,7 +1105,7 @@ if ! isLinux; then
 
   if build "lame" "3.100"; then
 
-    download "https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download?use_mirror=gigenet" "lame-3.100.tar.gz"
+    download "https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz" "lame-3.100.tar.gz"
 
     execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
     execute make -j ${MJOBS}
@@ -1147,6 +1147,11 @@ if ! isLinux; then
 
     download "https://ftp.osuosl.org/pub/xiph/releases/vorbis/libvorbis-1.3.7.tar.gz"
 
+    if [[ "${TARGET_OS}" == "darwin" ]]; then
+
+      sed -i.backup 's/-force_cpusubtype_ALL //g' configure # The -i.backup is intended and required on macOS: https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
+    fi
+
     execute ./configure --prefix="${WORKSPACE}" --with-ogg-libraries="${WORKSPACE}"/lib --with-ogg-includes="${WORKSPACE}"/include/ --enable-static --disable-shared --disable-oggtest
     execute make -j ${MJOBS}
     execute make install
@@ -1163,7 +1168,7 @@ if ! isLinux; then
 
     download "https://ftp.osuosl.org/pub/xiph/releases/theora/libtheora-1.1.1.tar.gz"
 
-    sed "s/-fforce-addr//g" configure >configure.patched
+    sed "s/-fforce-addr//g" configure > configure.patched
     chmod +x configure.patched
     mv configure.patched configure
 
@@ -1201,7 +1206,7 @@ if ${NONFREE_AND_GPL}; then
 
   if build "fdk_aac" "2.0.2"; then
 
-    download "https://sourceforge.net/projects/opencore-amr/files/fdk-aac/fdk-aac-2.0.2.tar.gz/download?use_mirror=gigenet" "fdk-aac-2.0.2.tar.gz"
+    download "https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-2.0.2.tar.gz" "fdk-aac-2.0.2.tar.gz"
 
     execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static --enable-pic
     execute make -j ${MJOBS}
@@ -1235,7 +1240,7 @@ if ! isLinux; then
 
   if build "libpng" "1.6.39"; then
 
-    download "https://gigenet.dl.sourceforge.net/project/libpng/libpng16/1.6.39/libpng-1.6.39.tar.gz" "libpng-1.6.39.tar.gz"
+    download "https://downloads.sourceforge.net/project/libpng/libpng16/1.6.39/libpng-1.6.39.tar.gz" "libpng-1.6.39.tar.gz"
 
     export LDFLAGS="${LDFLAGS}"
     export CPPFLAGS="${CFLAGS}"
@@ -1307,7 +1312,7 @@ if ${NONFREE_AND_GPL}; then
 
     if [ -n "${LDEXEFLAGS}" ]; then
 
-      sed -i.backup 's/-lgcc_s/-lgcc_eh/g' "${WORKSPACE}"/lib/pkgconfig/srt.pc # The -i.backup is intended and required on MacOS: https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
+      sed -i.backup 's/-lgcc_s/-lgcc_eh/g' "${WORKSPACE}"/lib/pkgconfig/srt.pc # The -i.backup is intended and required on macOS: https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
     fi
 
     build_done "srt" "1.5.1"
