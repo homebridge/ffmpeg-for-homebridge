@@ -1,26 +1,24 @@
-#!/bin/sh
-
+#!/bin/zsh
 set -e
 
-WORKDIR=$(pwd)
-BUILD_TARGET=/Users/Shared/ffmpeg-for-homebridge
+# Get the operating system and architecture to create the target in system-arch form.
+TARGET="$(uname -s | awk '{print tolower($0)}')-$(uname -m)"
 
-if [ ! -f "$WORKDIR/build-ffmpeg" ]; then
-  echo "Execute this script from inside the ffmpeg-for-homebridge project directory."
-  exit 1
-fi
+# Create our workspace.
+rm -rf "${TARGET}"
+mkdir -p "${TARGET}"
+cd ${TARGET}
 
-mkdir -p $BUILD_TARGET
-cd $BUILD_TARGET
+# Build FFmpeg.
+SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg --build --enable-gpl-and-non-free
 
-export SKIPINSTALL=yes
+# Package FFmpeg.
+echo "Packaging FFmpeg."
+mkdir -p package/usr/local/bin/
 
-$WORKDIR/build-ffmpeg --build --enable-gpl-and-non-free
+# Emulate the filesystem hierarchy so it's easily discoverable in a user's path environment variable.
+cp workspace/bin/ffmpeg package/usr/local/bin/ffmpeg
 
-rm -rf $BUILD_TARGET/upload
-mkdir -p $BUILD_TARGET/upload/usr/bin/local
-cp $BUILD_TARGET/workspace/bin/ffmpeg upload/usr/bin/local/
-tar -C $BUILD_TARGET/upload -zcvf ffmpeg-darwin-$(uname -m).tar.gz .
-cp ffmpeg-darwin-$(uname -m).tar.gz $WORKDIR/
+# Now we package it all up.
+tar -C package -zcvf ffmpeg-${TARGET}.tar.gz .
 
-echo "File to upload at $WORKDIR/ffmpeg-darwin-$(uname -m).tar.gz"

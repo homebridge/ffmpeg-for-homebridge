@@ -25,7 +25,7 @@ Specifically, we provide:
 |-------------------------------------|--------------------------------|
 | FreeBSD                             | x86_64                         |
 | Linux                               | x86_64, armv7l, aarch64        |
-| macOS (10.14 (Mojave) or newer)     | x86_64, arm64 (Apple Silicon)  |
+| macOS 13.0 (Ventura) or newer       | x86_64, arm64 (Apple Silicon)  |
 | Raspberry Pi 3 or better (Raspbian) | armv7l, aarch64                |
 | Windows 10 or newer                 | x86_64                         |
 
