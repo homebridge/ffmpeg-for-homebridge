@@ -506,23 +506,24 @@ if [[ "${TARGET_OS}" == "raspbian" ]]; then
   CONFIGURE_OPTIONS+=("--enable-omx-rpi")
 fi
 
-if build "giflib" "5.2.1"; then
-
-  download "https://downloads.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz"
-
-  if [[ "${TARGET_OS}" == "darwin" ]]; then
-
-    download "https://sourceforge.net/p/giflib/bugs/_discuss/thread/4e811ad29b/c323/attachment/Makefile.patch"
-    execute patch -p0 --forward "${PACKAGES}/giflib-5.2.1/Makefile" "${PACKAGES}/Makefile.patch" || true
-  fi
-  #multicore build disabled for this library
-  execute make
-  execute make PREFIX="${WORKSPACE}" install
-
-  build_done "giflib" "5.2.1"
-fi
-
 if ! isLinux; then
+
+  if build "giflib" "5.2.1"; then
+
+    download "https://downloads.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz"
+
+    if [[ "${TARGET_OS}" == "darwin" ]]; then
+
+      download "https://sourceforge.net/p/giflib/bugs/_discuss/thread/4e811ad29b/c323/attachment/Makefile.patch"
+      execute patch -p0 --forward "${PACKAGES}/giflib-5.2.1/Makefile" "${PACKAGES}/Makefile.patch" || true
+    fi
+    #multicore build disabled for this library
+    execute make
+    execute make PREFIX="${WORKSPACE}" install
+
+    build_done "giflib" "5.2.1"
+  fi
+
 
   if build "pkg-config" "0.29.2"; then
 
@@ -1345,6 +1346,20 @@ if isLinux && [[ "${TARGET_ARCH}" == "x86_64" ]]; then
   fi
 
   CONFIGURE_OPTIONS+=("--enable-libvpl")
+
+  # Libva support.
+  if build "libva" "latest"; then
+
+    download "https://github.com/intel/libva/archive/refs/tags/2.20.0.tar.gz" "libva-2.20.0.tar.gz"
+    
+    execute env LIBTOOLIZE="${WORKSPACE}/bin/libtoolize" ./autogen.sh --prefix="${WORKSPACE}" --with-drivers-path="/usr/lib/x86_64-linux-gnu/dri" --enable-static --disable-shared
+    execute make -j ${MJOBS}
+    execute make install
+
+    build_done "libva" "2.20.0"
+  fi
+
+  CONFIGURE_OPTIONS+=("--enable-vaapi")
 
   if command_exists "nvcc"; then
 

@@ -17,7 +17,8 @@ case $ID in
 
   alpine)
     echo "Configuring the Alpine Linux build environment."
-    apk add autoconf automake bash cmake curl diffutils g++ gcc git lame-dev libogg-static libpng-static libtheora-dev libtheora-static libvorbis-dev libvorbis-static linux-headers m4 make meson nasm opencore-amr-dev openssl-dev openssl-libs-static pcre-dev perl python3 samurai tar xz yasm zlib-dev zlib-static
+    apk add autoconf automake bash cmake curl diffutils g++ gcc giflib-static git lame-dev libdrm-dev libogg-static libpng-static libtheora-dev libtheora-static libtool libvorbis-dev libvorbis-static linux-headers m4 make meson nasm opencore-amr-dev openssl-dev openssl-libs-static pcre-dev perl python3 samurai tar xz yasm zlib-dev zlib-static
     ;;
+
 esac
 
