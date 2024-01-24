@@ -29,6 +29,7 @@ Specifically, we provide:
 | Raspberry Pi 3 or better (Raspbian) | armv7l, aarch64                |
 | Windows 10 or newer                 | x86_64                         |
 
+**Note: Raspberry Pi 5 is currently unsupported. There are multiple known issues that will be addressed in a future release.**
 ## Install
 
 #### Raspbian or armv7/armv8-based Linux environments:
