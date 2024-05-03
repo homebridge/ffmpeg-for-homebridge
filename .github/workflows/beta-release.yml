@@ -1,0 +1,204 @@
+# ci.yml: Continuous integration workflow.
+#
+name: 'Node-CI Beta Build and Release to NPM'
+
+on:
+  push:
+    branches: [beta-*.*.*]
+
+jobs:
+  tag:
+    name: Verify Release Tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=version::${GITHUB_REF#refs/heads/beta-}
+        shell: bash
+
+  prerelease:
+    needs: [tag]
+    name: "Create New Github Beta Pre Release"
+    if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create nightly release
+        id: create_release
+        uses: viperproject/create-nightly-release@v1
+        env:
+          # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.tag.outputs.version }}
+          release_name: v${{ needs.tag.outputs.version }}
+          body: |
+            v${{ needs.tag.outputs.version }}
+            [How To Test Upcoming Changes](https://github.com/homebridge/homebridge-config-ui-x/wiki/How-To-Test-Upcoming-Changes)
+          keep_num: 5
+          keep_tags: false
+
+  build:
+    name: 'Build FFmpeg'
+    needs: [tag,prerelease]
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      matrix:
+        name: [
+          alpine-aarch64,
+          alpine-arm32v7,
+          alpine-x86_64,
+          darwin-arm64,
+          darwin-x86_64,
+          windows-x86_64
+        ]
+        include:
+          - name: alpine-aarch64 # Build for arm v8 64-bit Linux environments.
+            os: ubuntu-latest
+            BASE_IMAGE: arm64v8/alpine:latest
+            DOCKERFILE: linux
+            EMULATE_ARCH: aarch64
+            TARGET_ARCH: aarch64
+            TARGET_OS: alpine
+          - name: alpine-arm32v7 # Build for arm v7 32-bit Linux environments.
+            os: ubuntu-latest
+            BASE_IMAGE: arm32v7/alpine:latest
+            DOCKERFILE: linux
+            EMULATE_ARCH: arm
+            TARGET_ARCH: arm32v7
+            TARGET_OS: alpine
+          - name: alpine-x86_64 # Build for Intel 64-bit Linux environments.
+            os: ubuntu-latest
+            BASE_IMAGE: library/alpine:latest
+            DOCKERFILE: linux
+            EMULATE_ARCH: aarch64 # This is intentional.
+            TARGET_ARCH: x86_64
+            TARGET_OS: alpine
+          - name: darwin-arm64  # Build for Apple Silicon macOS environments.
+            os: macos-13-large
+          - name: darwin-x86_64 # Build for Intel macOS environments.
+            os: macos-13
+          - name: windows-x86_64 # Build for Intel 64-bit Windows environments.
+            os: ubuntu-latest
+            BASE_IMAGE: library/ubuntu:latest
+            DOCKERFILE: windows
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: 'Caching workspace.'
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: build
+        key: ${{ matrix.name }}-cache
+
+    # Docker image build.
+    - name: 'Docker: creating the build image.'
+      if: runner.os == 'Linux'
+        # Configure QEMU to register handlers for our target architectures and build the image that will become our build environment.
+      run: |
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        docker build --build-arg BASE_IMAGE=${{ matrix.BASE_IMAGE }} --build-arg EMULATE_ARCH=${{ matrix.EMULATE_ARCH }} -f Dockerfile.${{ matrix.DOCKERFILE }} -t ffmpeg-builder-${{ matrix.name }} .
+
+    # Docker image build.
+    - name: 'Docker: building the FFmpeg binary.'
+      if: runner.os == 'Linux'
+      # Start the build environment for our requested target and fix any permissions issues that may have arisen due to containerization.
+      run: |
+        mkdir -p build
+        docker run -v $(pwd)/build:/build -e TARGET_OS=${{ matrix.TARGET_OS }} -e TARGET_BUILD_ARCH=${{ matrix.TARGET_ARCH }} ffmpeg-builder-${{ matrix.name }}
+        sudo chown -R $USER:$USER build
+
+    # macOS Builds.
+    - name: 'macOS: building the FFmpeg binary.'
+      if: runner.os == 'macOS'
+      # Execute the build script.
+      run: |
+        mkdir -p build
+        cd build && SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg --build --enable-gpl-and-non-free
+
+    # Package our binaries for non-Windows operating systems.
+    - name: 'Linux and macOS: packaging the binary.'
+      if: matrix.DOCKERFILE != 'windows'
+      # Emulate the filesystem hierarchy so it's easily discoverable in a user's path environment variable and now we package it all up.
+      run: |
+        mkdir -p package/usr/local/bin/
+        cp build/workspace/bin/ffmpeg package/usr/local/bin/ffmpeg
+        tar -C package -zcvf ffmpeg-${{ matrix.name }}.tar.gz .
+
+    # Package our binaries for Windows.
+    - name: 'Windows: packaging the binary.'
+      if: matrix.DOCKERFILE == 'windows'
+      # Copy the binary we're looking for and we are done.
+      run: |
+        cp build/ffmpeg.exe .
+
+    # Upload the packaged asset as an artifact.
+    - name: 'Uploading the packaged asset.'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ffmpeg-${{ matrix.name }}
+        path: |
+          ffmpeg-${{ matrix.name }}.tar.gz
+          ffmpeg.exe
+    
+    - name: Attach Bundle
+      uses: AButler/upload-release-assets@v3.0
+      with:
+        files: 'ffmpeg-${{ matrix.name }}.tar.gz;ffmpeg.exe'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        release-tag: v${{ needs.tag.outputs.version }}
+
+  build_package:
+    name: 'Build package'
+    needs: [tag,prerelease,build]
+    strategy:
+      matrix:
+        node-version: [ lts/-1, lts/* ]
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout the repository.
+        uses: actions/checkout@v3
+
+      - name: Setup the node ${{ matrix.node-version }} environment.
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build and install the package with a clean slate.
+        run: |
+          npm ci
+          npm run build --if-present
+        env:
+          CI: true
+
+  publish:
+    needs: [tag,prerelease,build,build_package]
+    name: Publish ${{ needs.tag.outputs.version }}
+    if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
+    uses: homebridge/.github/.github/workflows/npm-publish.yml@latest
+    with:
+      tag: 'beta'
+      dynamically_adjust_version: true
+      npm_version_command: 'pre'
+      pre_id: 'beta'
+      install_cmd: npm ci && cd ui && npm ci
+    secrets:
+      npm_auth_token: ${{ secrets.npm_token }}
+    
+  github-prerelease-to-discord:
+    name: Discord Webhooks
+    if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
+    needs: [tag,prerelease,build,build_package,publish]
+    uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
+    with:
+      title: "FFmpeg for Homebridge"
+      description: |
+        Version `v${{ needs.publish.outputs.NPM_VERSION }}`
+      url: "https://github.com/homebridge/homebridge-config-ui-x/releases/tag/v${{ needs.publish.outputs.NPM_VERSION }}"
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL_BETA }}

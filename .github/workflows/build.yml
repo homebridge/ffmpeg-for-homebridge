@@ -1,12 +1,11 @@
 # build.yml: Build FFmpeg binaries.
 #
-name: 'Build FFmpeg'
+name: 'Build FFmpeg binaries.'
 
 on:
   workflow_dispatch:
 
 jobs:
-
   build:
     name: 'Build FFmpeg'
     runs-on: ${{ matrix.os }}
