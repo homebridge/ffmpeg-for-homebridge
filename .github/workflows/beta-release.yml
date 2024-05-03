@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Get the version
         id: get_version
-        run: echo "version=${GITHUB_REF#refs/heads/beta-}" >> $GITHUB_ENV
+        run: echo ::set-output name=version::${GITHUB_REF#refs/heads/beta-}
         shell: bash
 
   prerelease:
