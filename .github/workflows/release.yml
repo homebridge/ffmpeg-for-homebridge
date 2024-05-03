@@ -68,9 +68,9 @@ jobs:
             TARGET_ARCH: x86_64
             TARGET_OS: alpine
           - name: darwin-arm64  # Build for Apple Silicon macOS environments.
-            os: macos-13-large
+            os: macos-latest
           - name: darwin-x86_64 # Build for Intel macOS environments.
-            os: macos-13
+            os: macos-latest-large
           - name: windows-x86_64 # Build for Intel 64-bit Windows environments.
             os: ubuntu-latest
             BASE_IMAGE: library/ubuntu:latest
