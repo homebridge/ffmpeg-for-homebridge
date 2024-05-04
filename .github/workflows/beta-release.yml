@@ -27,6 +27,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install semver
 
       - name: Fetch Adjust version script
         run: wget -q https://raw.githubusercontent.com/homebridge/.github/latest/.github/npm-version-script.js
