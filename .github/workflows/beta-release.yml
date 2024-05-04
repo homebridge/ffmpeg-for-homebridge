@@ -37,6 +37,9 @@ jobs:
         run: |
           echo ::set_output name=version::node .github/npm-version-script.js ${{ github.ref }} ${{ needs.tag.outputs.version }}
 
+      - name: Adjusted version
+        run: |
+          echo "Adjusted version: ${{ steps.adjusted_version.outputs.version }}"
 
   prerelease:
     needs: [tag,adjust_version]
