@@ -11,20 +11,14 @@ jobs:
     name: Get Latest Tag
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get_version.outputs.latestTag }}
-      tag: ${{ steps.remove_v.outputs.tag }}
+      version: ${{ steps.get_version.outputs.tag }}
     steps:
       - name: Get Release Tag
         id: get_version
-        uses: JinoArch/get-latest-tag@latest
+        uses: WyriHaximus/github-action-get-previous-tag@v1
       - name: Tag Info
         run: |
-          echo "Latest Tag: ${{ steps.get_version.outputs.latestTag }}"
-      - name: Remove v from tag
-        id: remove_v
-        run: |
-          echo steps.get_version.outputs.latestTag | sed 's/v//g' > .github/tag
-          echo ::set-output name=tag::$(cat .github/tag)
+          echo "Latest Tag: ${{ steps.get_version.outputs.tag }}"
 
   adjust_version:
     name: Adjust Version
@@ -52,7 +46,7 @@ jobs:
       - name: Adjust version
         id: adjusted_version
         run: |
-          node .github/npm-version-script.js ${{ github.ref }} ${{ needs.tag.outputs.tag }} > .github/version
+          node .github/npm-version-script.js ${{ github.ref }} ${{ needs.tag.outputs.version }} > .github/version
           echo ::set_output name=version::$(cat .github/version)
 
       - name: Adjusted version
