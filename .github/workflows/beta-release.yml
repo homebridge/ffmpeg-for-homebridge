@@ -7,48 +7,49 @@ on:
     branches: [beta-*.*.*]
 
 jobs:
-  adjust_version:
-    name: Adjust Version
+  prerelease:
+    name: Create Pre-Release
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.adjusted_version.outputs.version }}
+      version: ${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci
-
-      - name: Extract current version
-        id: extract_version
-        run: |
-          echo "::set-output name=version::$(node -p "require('./package.json').version")"
-
-      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install semver
-
-      - name: Fetch Adjust version script
-        run: wget -q https://raw.githubusercontent.com/homebridge/.github/latest/.github/npm-version-script.js
-        working-directory: .github
-
-      - name: Adjust version
-        id: adjusted_version
+          fetch-depth: 0  # Fetch all commits and tags
+      
+      - name: Get last pre-release tag or create new one
+        id: last-pre-release-tag
         run: |
-          node .github/npm-version-script.js ${{ github.ref }} ${{ steps.extract_version.outputs.version }} > .github/version
-          echo ::set_output name=version::$(cat .github/version)
+            # Fetch all tags
+            git fetch --tags
+  
+            # Fetch only the tags that match the pre-release format
+            pre_release_tags=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*-rc.*' --sort=-v:refname)
+  
+            # Get the last pre-release tag
+            last_pre_release_tag=$(echo "$pre_release_tags" | head -n 1)
+  
+            if [ -z "$last_pre_release_tag" ]; then
+              # If no pre-release tags found, get the last release tag
+              last_release_tag=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1)
+              IFS='.' read -r major minor patch <<< "$last_release_tag"
+              new_pre_release_tag="$major.$minor.$patch-rc.1"
+              echo "No pre-release tags found. Creating a new one: $new_pre_release_tag"
+            else
+              echo "Last pre-release tag: $last_pre_release_tag"
+              IFS='.' read -r major minor patch rc_number <<< "$last_pre_release_tag"
+              incremented_rc_number=$((rc_number + 1))
+              new_pre_release_tag="$major.$minor.$patch.$incremented_rc_number"
+            fi
+  
+            echo "::set-output name=new_pre_release_tag::$new_pre_release_tag"
+  
+      - name: Set environment variable
+        run: echo "NEW_PRE_RELEASE_TAG=${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}" >> $GITHUB_ENV
+  
+      - name: Display new pre-release tag
+        run: echo "New pre-release tag is $NEW_PRE_RELEASE_TAG"
 
-      - name: Adjusted version
-        run: |
-          echo "Adjusted version: ${{ steps.adjusted_version.outputs.version }}"
-
-  prerelease:
-    needs: [adjust_version]
-    name: "Create New Github Beta Pre Release"
-    if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - name: Create nightly release
         id: create_release
         uses: viperproject/create-nightly-release@v1
@@ -56,16 +57,16 @@ jobs:
           # This token is provided by Actions, you do not need to create your own token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: 'v${{ needs.adjust_version.outputs.version }}'
-          release_name: 'v${{ needs.adjust_version.outputs.version }}'
+          tag_name: 'v${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}'
+          release_name: 'v${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}'
           body: |
-            v${{ needs.adjust_version.outputs.version }}
+            v${{ steps.last-pre-release-tag.outputs.new_pre_release_tagn }}
           keep_num: 5
           keep_tags: false
 
   build:
     name: 'Build FFmpeg'
-    needs: [adjust_version,prerelease]
+    needs: [prerelease]
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     strategy:
@@ -177,7 +178,7 @@ jobs:
 
   build_package:
     name: 'Build package'
-    needs: [adjust_version,prerelease,build]
+    needs: [prerelease,build]
     strategy:
       matrix:
         node-version: [ lts/-1, lts/* ]
@@ -200,7 +201,7 @@ jobs:
           CI: true
 
   publish:
-    needs: [adjust_version,prerelease,build,build_package]
+    needs: [prerelease,build,build_package]
     name: Publish ${{ needs.adjust_version.outputs.version }}
     if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
     uses: homebridge/.github/.github/workflows/npm-publish.yml@latest
@@ -216,7 +217,7 @@ jobs:
   github-prerelease-to-discord:
     name: Discord Webhooks
     if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
-    needs: [adjust_version,prerelease,build,build_package,publish]
+    needs: [prerelease,build,build_package,publish]
     uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
     with:
       title: "FFmpeg for Homebridge"
