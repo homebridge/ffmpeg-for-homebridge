@@ -7,25 +7,17 @@ on:
     branches: [beta-*.*.*]
 
 jobs:
-  tag:
-    name: Verify Release Tag
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.get_version.outputs.version }}
-    steps:
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=version::${GITHUB_REF#refs/heads/beta-}
-        shell: bash
-
   adjust_version:
     name: Adjust Version
-    needs: [tag]
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.adjusted_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+      - run: npm ci
+      - uses: nelonoel/branch-name@v1.0.1
+      # Use branch name for whatever purpose
+      - run: echo ${BRANCH_NAME}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -40,7 +32,7 @@ jobs:
       - name: Adjust version
         id: adjusted_version
         run: |
-          node .github/npm-version-script.js ${{ github.ref }} beta > .github/version
+          node .github/npm-version-script.js ${{ github.ref }} ${BRANCH_NAME} > .github/version
           echo ::set_output name=version::$(cat .github/version)
 
       - name: Adjusted version
@@ -48,7 +40,7 @@ jobs:
           echo "Adjusted version: ${{ steps.adjusted_version.outputs.version }}"
 
   prerelease:
-    needs: [tag,adjust_version]
+    needs: [adjust_version]
     name: "Create New Github Beta Pre Release"
     if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
     runs-on: ubuntu-latest
@@ -70,7 +62,7 @@ jobs:
 
   build:
     name: 'Build FFmpeg'
-    needs: [tag,adjust_version,prerelease]
+    needs: [adjust_version,prerelease]
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     strategy:
@@ -182,7 +174,7 @@ jobs:
 
   build_package:
     name: 'Build package'
-    needs: [tag,prerelease,build]
+    needs: [adjust_version,prerelease,build]
     strategy:
       matrix:
         node-version: [ lts/-1, lts/* ]
@@ -205,7 +197,7 @@ jobs:
           CI: true
 
   publish:
-    needs: [tag,adjust_version,prerelease,build,build_package]
+    needs: [adjust_version,prerelease,build,build_package]
     name: Publish ${{ needs.adjust_version.outputs.version }}
     if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
     uses: homebridge/.github/.github/workflows/npm-publish.yml@latest
@@ -221,7 +213,7 @@ jobs:
   github-prerelease-to-discord:
     name: Discord Webhooks
     if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
-    needs: [tag,prerelease,build,build_package,publish]
+    needs: [adjust_version,prerelease,build,build_package,publish]
     uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
     with:
       title: "FFmpeg for Homebridge"
