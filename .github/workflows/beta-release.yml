@@ -24,7 +24,7 @@ jobs:
             git fetch --tags
   
             # Fetch only the tags that match the pre-release format
-            pre_release_tags=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*-rc.*' --sort=-v:refname)
+            pre_release_tags=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*-beta.*' --sort=-v:refname)
   
             # Get the last pre-release tag
             last_pre_release_tag=$(echo "$pre_release_tags" | head -n 1)
@@ -33,13 +33,13 @@ jobs:
               # If no pre-release tags found, get the last release tag
               last_release_tag=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1)
               IFS='.' read -r major minor patch <<< "$last_release_tag"
-              new_pre_release_tag="$major.$minor.$patch-rc.1"
+              new_pre_release_tag="$major.$minor.$patch-beta.1"
               echo "No pre-release tags found. Creating a new one: $new_pre_release_tag"
             else
               echo "Last pre-release tag: $last_pre_release_tag"
-              IFS='.' read -r major minor patch rc_number <<< "$last_pre_release_tag"
-              incremented_rc_number=$((rc_number + 1))
-              new_pre_release_tag="$major.$minor.$patch.$incremented_rc_number"
+              IFS='.' read -r major minor patch beta_number <<< "$last_pre_release_tag"
+              incremented_beta_number=$((beta_number + 1))
+              new_pre_release_tag="$major.$minor.$patch.$incremented_beta_number"
             fi
   
             echo "::set-output name=new_pre_release_tag::$new_pre_release_tag"
