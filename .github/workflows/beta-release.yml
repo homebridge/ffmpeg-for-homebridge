@@ -11,14 +11,14 @@ jobs:
     name: Get Latest Tag
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get_version.outputs.tag }}
+      version: ${{ steps.get_version.outputs.published-version }}
     steps:
       - name: Get Release Tag
         id: get_version
-        uses: WyriHaximus/github-action-get-previous-tag@v1
-      - name: Tag Info
+        uses: PostHog/check-package-version@v1
+      - name: Version Info
         run: |
-          echo "Latest Tag: ${{ steps.get_version.outputs.tag }}"
+          echo "Latest Version: ${{ steps.get_version.outputs.published-version }}"
 
   adjust_version:
     name: Adjust Version
