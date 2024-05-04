@@ -57,10 +57,10 @@ jobs:
           # This token is provided by Actions, you do not need to create your own token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: 'v${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}'
-          release_name: 'v${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}'
+          tag_name: '${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}'
+          release_name: '${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}'
           body: |
-            v${{ steps.last-pre-release-tag.outputs.new_pre_release_tagn }}
+            ${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}
           keep_num: 5
           keep_tags: false
 
