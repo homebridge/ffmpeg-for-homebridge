@@ -7,31 +7,20 @@ on:
     branches: [beta-*.*.*]
 
 jobs:
-  tag:
-    name: Get Version
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.get_version.outputs.current-version }}
-    steps:
-      - name: Get Version
-        id: get_version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
-      - name: Version Info
-        run: |
-          echo "Version: ${{ steps.get_version.outputs.current-version }}"
-
   adjust_version:
     name: Adjust Version
     runs-on: ubuntu-latest
-    needs: [tag]
     outputs:
       version: ${{ steps.adjusted_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
-      - uses: nelonoel/branch-name@v1.0.1
-      # Use branch name for whatever purpose
-      - run: echo ${BRANCH_NAME}
+
+      - name: Extract current version
+        id: extract_version
+        run: |
+          echo "::set-output name=version::$(node -p "require('./package.json').version")"
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -46,7 +35,7 @@ jobs:
       - name: Adjust version
         id: adjusted_version
         run: |
-          node .github/npm-version-script.js ${{ github.ref }} ${{ needs.tag.outputs.version }} > .github/version
+          node .github/npm-version-script.js ${{ github.ref }} ${{ steps.extract_version.outputs.version }} > .github/version
           echo ::set_output name=version::$(cat .github/version)
 
       - name: Adjusted version
