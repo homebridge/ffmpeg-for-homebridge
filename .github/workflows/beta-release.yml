@@ -35,7 +35,8 @@ jobs:
       - name: Adjust version
         id: adjusted_version
         run: |
-          echo ::set_output name=version::node .github/npm-version-script.js ${{ github.ref }} ${{ needs.tag.outputs.version }}
+          node .github/npm-version-script.js ${{ github.ref }} ${{ needs.tag.outputs.version }} > .github/version
+          echo ::set_output name=version::$(cat .github/version)
 
       - name: Adjusted version
         run: |
