@@ -7,9 +7,23 @@ on:
     branches: [beta-*.*.*]
 
 jobs:
+  tag:
+    name: Verify Release Tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Get Release Tag
+        id: get_version
+        uses: jannemattila/get-version-from-tag@v3
+      - name: Tag Info
+        run: |
+          echo "Latest Tag: ${{ steps.get_version.outputs.version }}"
+
   adjust_version:
     name: Adjust Version
     runs-on: ubuntu-latest
+    needs: [tag]
     outputs:
       version: ${{ steps.adjusted_version.outputs.version }}
     steps:
@@ -32,7 +46,7 @@ jobs:
       - name: Adjust version
         id: adjusted_version
         run: |
-          node .github/npm-version-script.js ${{ github.ref }} ${BRANCH_NAME} > .github/version
+          node .github/npm-version-script.js ${{ github.ref }} ${{ needs.tag.outputs.version }} > .github/version
           echo ::set_output name=version::$(cat .github/version)
 
       - name: Adjusted version
