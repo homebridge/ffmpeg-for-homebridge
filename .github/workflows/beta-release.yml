@@ -8,17 +8,17 @@ on:
 
 jobs:
   tag:
-    name: Verify Release Tag
+    name: Get Latest Tag
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get_version.outputs.version }}
+      version: ${{ steps.get_version.outputs.latestTag }}
     steps:
       - name: Get Release Tag
         id: get_version
-        uses: jannemattila/get-version-from-tag@v3
+        uses: JinoArch/get-latest-tag@latest
       - name: Tag Info
         run: |
-          echo "Latest Tag: ${{ steps.get_version.outputs.version }}"
+          echo "Latest Tag: ${{ steps.get_version.outputs.latestTag }}"
 
   adjust_version:
     name: Adjust Version
