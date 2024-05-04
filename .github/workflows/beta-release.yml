@@ -59,8 +59,6 @@ jobs:
         with:
           tag_name: '${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}'
           release_name: '${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}'
-          body: |
-            ${{ steps.last-pre-release-tag.outputs.new_pre_release_tag }}
           keep_num: 5
           keep_tags: false
 
@@ -174,7 +172,7 @@ jobs:
       with:
         files: 'ffmpeg-${{ matrix.name }}.tar.gz;ffmpeg.exe'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        release-tag: v${{ needs.adjust_version.outputs.version }}
+        release-tag: ${{ needs.prerelease.outputs.version }}
 
   build_package:
     name: 'Build package'
@@ -202,7 +200,7 @@ jobs:
 
   publish:
     needs: [prerelease,build,build_package]
-    name: Publish ${{ needs.adjust_version.outputs.version }}
+    name: Publish ${{ needs.prerelease.outputs.version }}
     if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
     uses: homebridge/.github/.github/workflows/npm-publish.yml@latest
     with:
