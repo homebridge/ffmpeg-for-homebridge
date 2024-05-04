@@ -18,8 +18,28 @@ jobs:
         run: echo ::set-output name=version::${GITHUB_REF#refs/heads/beta-}
         shell: bash
 
-  prerelease:
+  adjust_version:
+    name: Adjust Version
     needs: [tag]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.adjusted_version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+
+      - name: Fetch Adjust version script
+        run: wget -q https://raw.githubusercontent.com/homebridge/.github/latest/.github/npm-version-script.js
+        working-directory: .github
+
+      - name: Adjust version
+        id: adjusted_version
+        run: |
+          echo ::set_output name=version::node .github/npm-version-script.js ${{ github.ref }} ${{ needs.tag.outputs.version }}
+
+
+  prerelease:
+    needs: [tag,adjust_version]
     name: "Create New Github Beta Pre Release"
     if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
     runs-on: ubuntu-latest
@@ -32,17 +52,17 @@ jobs:
           # This token is provided by Actions, you do not need to create your own token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ needs.tag.outputs.version }}
-          release_name: v${{ needs.tag.outputs.version }}
+          tag_name: v${{ needs.adjust_version.outputs.version }}
+          release_name: v${{ needs.adjust_version.outputs.version }}
           body: |
-            v${{ needs.tag.outputs.version }}
+            v${{ needs.adjust_version.outputs.version }}
             [How To Test Upcoming Changes](https://github.com/homebridge/homebridge-config-ui-x/wiki/How-To-Test-Upcoming-Changes)
           keep_num: 5
           keep_tags: false
 
   build:
     name: 'Build FFmpeg'
-    needs: [tag,prerelease]
+    needs: [tag,adjust_version,prerelease]
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     strategy:
@@ -150,7 +170,7 @@ jobs:
       with:
         files: 'ffmpeg-${{ matrix.name }}.tar.gz;ffmpeg.exe'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        release-tag: v${{ needs.tag.outputs.version }}
+        release-tag: v${{ needs.adjust_version.outputs.version }}
 
   build_package:
     name: 'Build package'
@@ -177,8 +197,8 @@ jobs:
           CI: true
 
   publish:
-    needs: [tag,prerelease,build,build_package]
-    name: Publish ${{ needs.tag.outputs.version }}
+    needs: [tag,adjust_version,prerelease,build,build_package]
+    name: Publish ${{ needs.adjust_version.outputs.version }}
     if: ${{ github.repository == 'homebridge/ffmpeg-for-homebridge' }}
     uses: homebridge/.github/.github/workflows/npm-publish.yml@latest
     with:

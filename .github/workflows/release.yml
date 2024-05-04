@@ -130,7 +130,7 @@ jobs:
       with:
         files: 'ffmpeg-${{ matrix.name }}.tar.gz;ffmpeg.exe'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        release-tag: ${{ needs.tag.outputs.version }}
+        release-tag: v${{ needs.tag.outputs.version }}
 
   build_package:
     needs: [tag,build]
