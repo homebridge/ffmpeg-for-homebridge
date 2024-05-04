@@ -8,17 +8,17 @@ on:
 
 jobs:
   tag:
-    name: Get Latest Tag
+    name: Get Version
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get_version.outputs.published-version }}
+      version: ${{ steps.get_version.outputs.current-version }}
     steps:
-      - name: Get Release Tag
+      - name: Get Version
         id: get_version
-        uses: PostHog/check-package-version@v1
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
       - name: Version Info
         run: |
-          echo "Latest Version: ${{ steps.get_version.outputs.published-version }}"
+          echo "Version: ${{ steps.get_version.outputs.current-version }}"
 
   adjust_version:
     name: Adjust Version
