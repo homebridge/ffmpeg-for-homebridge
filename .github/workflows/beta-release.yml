@@ -52,11 +52,10 @@ jobs:
           # This token is provided by Actions, you do not need to create your own token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ needs.adjust_version.outputs.version }}
-          release_name: v${{ needs.adjust_version.outputs.version }}
+          tag_name: 'v${{ needs.adjust_version.outputs.version }}'
+          release_name: 'v${{ needs.adjust_version.outputs.version }}'
           body: |
             v${{ needs.adjust_version.outputs.version }}
-            [How To Test Upcoming Changes](https://github.com/homebridge/homebridge-config-ui-x/wiki/How-To-Test-Upcoming-Changes)
           keep_num: 5
           keep_tags: false
 
