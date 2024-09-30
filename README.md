@@ -72,6 +72,7 @@ FFmpeg is built with the following configuration options:
     --enable-libopencore_amrnb
     --enable-libopencore_amrwb
     --enable-libopus
+    --enable-libspeex
     --enable-libsrt
     --enable-libsvtav1
     --enable-libtheora
