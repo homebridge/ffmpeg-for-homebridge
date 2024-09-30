@@ -1131,6 +1131,19 @@ fi
 
 CONFIGURE_OPTIONS+=("--enable-libopus")
 
+if build "speex" "1.2.1"; then
+
+  download "https://ftp.osuosl.org/pub/xiph/releases/speex/speex-1.2.1.tar.gz"
+
+  execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
+  execute make -j ${MJOBS}
+  execute make install
+
+  build_done "speex" "1.2.1"
+fi
+
+CONFIGURE_OPTIONS+=("--enable-libspeex")
+
 if ! isLinux; then
 
   if build "libogg" "1.3.5"; then
