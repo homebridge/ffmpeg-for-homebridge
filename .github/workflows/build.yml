@@ -56,7 +56,7 @@ jobs:
 
           # Build for Apple Silicon macOS environments.
           - name: darwin-arm64
-            os: macos-14
+            os: macos-15
 
           # Build for Intel macOS environments.
           - name: darwin-x86_64
