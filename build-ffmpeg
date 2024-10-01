@@ -6,8 +6,8 @@
 # LICENSE: https://github.com/markus-perl/ffmpeg-build-script/blob/master/LICENSE
 #
 PROGNAME=$(basename "$0")
-FFMPEG_VERSION=6.0
-SCRIPT_VERSION=1.46
+FFMPEG_VERSION=6.1.2
+SCRIPT_VERSION=1.47
 CWD=$(pwd)
 PACKAGES="${CWD}/packages"
 WORKSPACE="${CWD}/workspace"
@@ -1131,6 +1131,19 @@ fi
 
 CONFIGURE_OPTIONS+=("--enable-libopus")
 
+if build "speex" "1.2.1"; then
+
+  download "https://ftp.osuosl.org/pub/xiph/releases/speex/speex-1.2.1.tar.gz"
+
+  execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
+  execute make -j ${MJOBS}
+  execute make install
+
+  build_done "speex" "1.2.1"
+fi
+
+CONFIGURE_OPTIONS+=("--enable-libspeex")
+
 if ! isLinux; then
 
   if build "libogg" "1.3.5"; then
@@ -1438,7 +1451,7 @@ fi
 
 build "ffmpeg" "${FFMPEG_VERSION}"
 
-download "https://github.com/FFmpeg/FFmpeg/archive/refs/heads/release/${FFMPEG_VERSION}.tar.gz" "FFmpeg-release-${FFMPEG_VERSION}.tar.gz"
+download "https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz" "FFmpeg-release-${FFMPEG_VERSION}.tar.gz"
 
 # shellcheck disable=SC2086
 echo ./configure "${CONFIGURE_OPTIONS[@]}" \
