@@ -135,7 +135,7 @@ jobs:
 
     # Upload the packaged asset as an artifact.
     - name: 'Uploading the packaged asset.'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
 
         name: ffmpeg-${{ matrix.name }}
