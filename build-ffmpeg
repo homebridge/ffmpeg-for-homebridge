@@ -529,7 +529,7 @@ if ! isLinux; then
 
     download "https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.2.tar.gz"
 
-    execute ./configure --silent --prefix="${WORKSPACE}" --with-pc-path="${WORKSPACE}/lib/pkgconfig:/usr/lib/${TARGET_ARCH}-${OSTYPE}/pkgconfig" --with-internal-glib
+    execute ./configure CFLAGS="-g -O2 -Wno-int-conversion" --silent --prefix="${WORKSPACE}" --with-pc-path="${WORKSPACE}/lib/pkgconfig:/usr/lib/${TARGET_ARCH}-${OSTYPE}/pkgconfig" --with-internal-glib
     execute make -j ${MJOBS}
     execute make install
 
@@ -705,13 +705,13 @@ if command_exists "python3"; then
     if command_exists "pip3"; then
 
       # meson and ninja can be installed via pip3
-      execute pip3 install pip setuptools --quiet --upgrade --no-cache-dir --disable-pip-version-check
+      execute /usr/bin/pip3 install pip setuptools --quiet --upgrade --no-cache-dir --disable-pip-version-check
 
       for r in meson ninja; do
 
         if ! command_exists ${r}; then
 
-          execute pip3 install ${r} --quiet --upgrade --no-cache-dir --disable-pip-version-check
+          execute /usr/bin/pip3 install ${r} --quiet --upgrade --no-cache-dir --disable-pip-version-check
         fi
 
         export PATH=${PATH}:~/Library/Python/3.9/bin
