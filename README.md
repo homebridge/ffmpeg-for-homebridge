@@ -25,8 +25,8 @@ Specifically, we provide:
 |-------------------------------------|--------------------------------|
 | FreeBSD                             | x86_64                         |
 | Linux                               | x86_64, armv7l, aarch64        |
-| macOS 13.0 (Ventura) or newer       | x86_64, arm64 (Apple Silicon)  |
-| Raspberry Pi 3 or better (Raspbian) | armv7l, aarch64                |
+| macOS 14.0 (Sonoma) or newer        | x86_64, arm64 (Apple Silicon)  |
+| Raspberry Pi 4 or better (Raspbian) | armv7l, aarch64                |
 | Windows 10 or newer                 | x86_64                         |
 
 **Note: Raspberry Pi 5 is currently unsupported. There are multiple known issues that will be addressed in a future release.**
