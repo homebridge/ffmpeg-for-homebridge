@@ -25,12 +25,12 @@ Specifically, we provide:
 |-------------------------------------|--------------------------------|
 | FreeBSD                             | x86_64                         |
 | Linux                               | x86_64, armv7l, aarch64        |
-| macOS 14.0 (Sonoma) or newer        | x86_64, arm64 (Apple Silicon)  |
+| macOS 15.0 (Sequoia) or newer       | x86_64, arm64 (Apple Silicon)  |
 | Raspberry Pi 4 or better (Raspbian) | armv7l, aarch64                |
 | Windows 10 or newer                 | x86_64                         |
 
-**Note: Raspberry Pi 5 is currently unsupported. There are multiple known issues that will be addressed in a future release.**
-## Install
+**Note: Raspberry Pi 5 is currently unsupported. There are multiple known issues with FFmpeg and Raspberry Pi 5 that will hopefully be addressed by the respective teams in the future.**
+**Note: Currently (October 2024), FFmpeg v7.1 appears to be somewhat broken for HEVC and H.264 decoding in some scenarios. We hope to support future FFmpeg LTS releases as they stabilize and mature.**
 
 #### Raspbian or armv7/armv8-based Linux environments:
 
