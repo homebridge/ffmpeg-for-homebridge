@@ -15,9 +15,9 @@ This project provides static FFmpeg binaries for multiple platforms and architec
 
 Specifically, we provide:
 
-* Audio support using `libfdk-aac`
-* * Hardware-accelerated encoding support on Intel platforms using `h264_qsv` and hardware-accelerated encoding on Raspberry Pi 4+ using `h264_v4l2m2m`
-* * Hardware-accelerated encoding support on Apple platforms using `videotoolbox`
+* Audio support using `libfdk-aac`.
+* Hardware-accelerated encoding support on Intel platforms using `h264_qsv` and hardware-accelerated encoding on Raspberry Pi 4+ using `h264_v4l2m2m`.
+* Hardware-accelerated encoding support on Apple platforms using `videotoolbox`.
 
 ## Supported Platforms
 | OS                                  | Supported Architectures        |
