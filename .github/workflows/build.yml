@@ -60,7 +60,7 @@ jobs:
 
           # Build for Intel macOS environments.
           - name: darwin-x86_64
-            os: macos-13
+            os: macos-15-large
 
           # Build for Intel 64-bit Windows environments.
           - name: windows-x86_64
