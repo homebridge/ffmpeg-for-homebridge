@@ -29,8 +29,8 @@ Specifically, we provide:
 | Windows 10 or newer                 | x86_64                         |
 
 > [!NOTE]
-> * Raspberry Pi 5 is currently unsupported. There are multiple known issues with FFmpeg and Raspberry Pi 5 that will hopefully be addressed by the respective teams in the future.**
-> * Currently (October 2024), FFmpeg v7.1 appears to be somewhat broken for HEVC and H.264 decoding in some scenarios. We hope to support future FFmpeg LTS releases as they stabilize and mature.**
+> * **Raspberry Pi 5 is currently unsupported. There are multiple known issues with FFmpeg and Raspberry Pi 5 that will hopefully be addressed by the respective teams in the future.**
+> * **Currently (October 2024), FFmpeg v7.1 appears to be somewhat broken for HEVC and H.264 decoding in some scenarios. We hope to support future FFmpeg LTS releases as they stabilize and mature.**
 
 #### Raspbian or armv7/armv8-based Linux environments:
 
