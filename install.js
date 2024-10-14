@@ -9,6 +9,8 @@ const dotenv = require("dotenv");
 const get = require("simple-get");
 const tar = require("tar");
 
+const DOWNLOAD_RETRY_ATTEMPTS = 2;
+
 function targetFfmpegRelease() {
 
   return "v" + process.env.npm_package_version;
@@ -111,56 +113,89 @@ async function getDownloadFileName() {
   }
 }
 
-async function downloadFfmpeg(downloadUrl, ffmpegDownloadPath) {
+async function downloadFfmpeg(downloadUrl, ffmpegDownloadPath, retries = DOWNLOAD_RETRY_ATTEMPTS) {
 
-  // Open a write stream to the download location.
   const tempFile = path.resolve(ffmpegCache(), ".download");
-  const file = fs.createWriteStream(tempFile);
 
-  console.log("Downloading FFmpeg from: %s", downloadUrl);
+  console.log("Downloading FFmpeg from: " + downloadUrl);
 
   return new Promise((resolve, reject) => {
 
-    get({
-      url: downloadUrl,
-    }, (err, res) => {
+    const file = fs.createWriteStream(tempFile);
 
-      if(err || res.statusCode !== 200) {
+    const attemptDownload = () => {
 
-        return reject(err);
-      }
+      // Download the file.
+      get(downloadUrl, (err, res) => {
 
-      const totalBytes = parseInt(res.headers["content-length"], 10);
-      let downloadedBytes = 0;
+        if(err || (res.statusCode !== 200)) {
 
-      res.on("data", (chunk) => {
+          console.log("Download failed. Retrying.");
 
-        downloadedBytes = downloadedBytes + chunk.length;
-        const percent = Math.round((downloadedBytes / totalBytes) * 100) + "%";
-        process.stdout.write("\r" + percent);
+          // Clean up the incomplete download before proceeding.
+          if(retries > 0) {
+
+            file.close();
+            fs.unlinkSync(tempFile);
+
+            return downloadFfmpeg(downloadUrl, ffmpegDownloadPath, retries - 1)
+              .then(resolve)
+              .catch(reject);
+          }
+
+          return reject(err || new Error("Failed to download after " + (DOWNLOAD_RETRY_ATTEMPTS + 1).toString() + " attempts."));
+        }
+
+        // We ensure totalBytes is never zero so we avoid divide-by-zero errors.
+        const totalBytes = parseInt(res.headers["content-length"], 10) || 1;
+        let downloadedBytes = 0;
+
+        // Inform users of our progress.
+        res.on("data", (chunk) => {
+
+          downloadedBytes += chunk.length;
+          process.stdout.write("\r" + Math.round((downloadedBytes / totalBytes) * 100).toString() + "%.");
+        });
+
+        // Download complete and the file is now closed, rename it.
+        file.on("close", () => {
+
+          fs.renameSync(tempFile, ffmpegDownloadPath);
+          resolve();
+        });
+
+        // Error handling.
+        file.on("error", (error) => {
+
+          console.log(error);
+          reject(error);
+        });
+
+        // All data written - we've completed the download.
+        file.on("finish", () => console.log(" - download complete."));
+
+        res.pipe(file);
+      }).on("error", (error) => {
+
+        console.log("Request error: ", error);
+
+        // Clean up the incomplete download before proceeding.
+        if(retries > 0) {
+
+          console.log("Retrying download.");
+          fs.unlinkSync(tempFile); // Clean up on error
+
+          return downloadFfmpeg(downloadUrl, ffmpegDownloadPath, retries - 1)
+            .then(resolve)
+            .catch(reject);
+        }
+
+        reject(new Error("Failed after " + (DOWNLOAD_RETRY_ATTEMPTS + 1).toString() + " attempts."));
       });
+    };
 
-      file.on("finish", () => {
-
-        console.log(" - Download Complete");
-        file.close();
-      });
-
-      file.on("close", () => {
-
-        fs.renameSync(tempFile, ffmpegDownloadPath);
-        resolve();
-      })
-
-      file.on("error", (error) => {
-
-        console.log(error);
-        reject(error)
-      });
-
-      res.pipe(file);
-    })
-  })
+    attemptDownload();
+  });
 }
 
 function binaryOk(ffmpegTempPath) {
@@ -168,6 +203,7 @@ function binaryOk(ffmpegTempPath) {
   try {
 
     child_process.execSync(ffmpegTempPath + " -buildconf");
+
     return true;
   } catch (e) {
 
@@ -273,7 +309,7 @@ async function install() {
 // Bootstrap the installation process.
 async function bootstrap() {
 
-  console.log("Building for version: %s.", targetFfmpegRelease());
+  console.log("Retrieving FFmpeg from ffmpeg-for-homebridge release: %s.", targetFfmpegRelease());
 
   try {
 
