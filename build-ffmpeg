@@ -6,8 +6,8 @@
 # LICENSE: https://github.com/markus-perl/ffmpeg-build-script/blob/master/LICENSE
 #
 PROGNAME=$(basename "$0")
-FFMPEG_VERSION=7.0.2
-SCRIPT_VERSION=1.47
+FFMPEG_VERSION="7.0.2"
+SCRIPT_VERSION="1.46-homebridge.2.1.5"
 CWD=$(pwd)
 PACKAGES="${CWD}/packages"
 WORKSPACE="${CWD}/workspace"
