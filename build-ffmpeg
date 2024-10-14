@@ -788,35 +788,27 @@ if ${NONFREE_AND_GPL}; then
 
   if build "x264" "latest"; then
 
-    clone "https://code.videolan.org/videolan/x264.git" "x264-latest"
+    clone "https://code.videolan.org/videolan/x264.git" "x264-${CURRENT_PACKAGE_VERSION}"
     execute ./configure --prefix="${WORKSPACE}" --enable-static --enable-pic
 
     execute make -j ${MJOBS}
     execute make install
     execute make install-lib-static
 
-    build_done "x264" "latest"
+    build_done "x264" "${CURRENT_PACKAGE_VERSION}"
   fi
 
   CONFIGURE_OPTIONS+=("--enable-libx264")
 fi
 
-if ${NONFREE_AND_GPL} && (isAppleSilicon || [[ ! "${TARGET_ARCH}" == "arm"* ]]) ; then
+# 32-bit ARM platforms like Raspberry Pi don't build x265 cleanly.
+if ${NONFREE_AND_GPL} && [[ ! "${TARGET_ARCH}" == "armv7l" ]] ; then
 
   if build "x265" "latest"; then
 
-    if isAppleSilicon; then
-
-      download "https://bitbucket.org/multicoreware/x265_git/get/931178347b3f73e40798fd5180209654536bbaa5.tar.gz" "x265-3.5.tar.gz" # This is actually 3.4 if looking at x265Versio
-    else
-
-      clone "https://bitbucket.org/multicoreware/x265_git.git" "x265-latest"
-    fi
+    clone "https://bitbucket.org/multicoreware/x265_git.git" "x265-${CURRENT_PACKAGE_VERSION}"
 
     cd build/linux || exit
-    execute cmake -G "Unix Makefiles" ../../source
-#    execute env CMAKE_INSTALL_PREFIX="${WORKSPACE}" bash ./multilib.sh
-
     rm -rf 8bit 10bit 12bit 2>/dev/null
     mkdir -p 8bit 10bit 12bit
 
@@ -858,32 +850,33 @@ EOF
       sed -i.backup 's/-lgcc_s/-lgcc_eh/g' "${WORKSPACE}/lib/pkgconfig/x265.pc" # The -i.backup is intended and required on macOS: https://stackoverflow.com/questions/5694228/sed-in-place-flag-that-works-both-on-mac-bsd-and-linux
     fi
 
-    build_done "x265" "latest"
+    build_done "x265" "${CURRENT_PACKAGE_VERSION}"
   fi
 
   CONFIGURE_OPTIONS+=("--enable-libx265")
 fi
 
 if [[ ! "${TARGET_ARCH}" == "arm"* ]]; then
-if build "libvpx" "1.13.0"; then
 
-  download "https://github.com/webmproject/libvpx/archive/refs/tags/v1.13.0.tar.gz" "libvpx-1.13.0.tar.gz"
+  if build "libvpx" "1.13.0"; then
 
-  if [[ "${TARGET_OS}" == "darwin" ]]; then
+    download "https://github.com/webmproject/libvpx/archive/refs/tags/v1.13.0.tar.gz" "libvpx-1.13.0.tar.gz"
 
-    echo "Applying Darwin patch"
-    sed "s/,--version-script//g" build/make/Makefile > build/make/Makefile.patched
-    sed "s/-Wl,--no-undefined -Wl,-soname/-Wl,-undefined,error -Wl,-install_name/g" build/make/Makefile.patched > build/make/Makefile
+    if [[ "${TARGET_OS}" == "darwin" ]]; then
+
+      echo "Applying Darwin patch"
+      sed "s/,--version-script//g" build/make/Makefile > build/make/Makefile.patched
+      sed "s/-Wl,--no-undefined -Wl,-soname/-Wl,-undefined,error -Wl,-install_name/g" build/make/Makefile.patched > build/make/Makefile
+    fi
+
+    execute ./configure --prefix="${WORKSPACE}" --disable-unit-tests --disable-shared --disable-examples --as=yasm --enable-vp9-highbitdepth
+    execute make -j ${MJOBS}
+    execute make install
+
+    build_done "libvpx" "1.13.0"
   fi
 
-  execute ./configure --prefix="${WORKSPACE}" --disable-unit-tests --disable-shared --disable-examples --as=yasm --enable-vp9-highbitdepth
-  execute make -j ${MJOBS}
-  execute make install
-
-  build_done "libvpx" "1.13.0"
-fi
-
-CONFIGURE_OPTIONS+=("--enable-libvpx")
+  CONFIGURE_OPTIONS+=("--enable-libvpx")
 fi
 
 if ${NONFREE_AND_GPL}; then
@@ -1073,13 +1066,13 @@ if ! isLinux; then
 
   if build "opencore" "0.1.6"; then
 
-    download "https://downloads.sourceforge.net/project/opencore-amr/opencore-amr/opencore-amr-0.1.6.tar.gz" "opencore-amr-0.1.6.tar.gz"
+    download "https://downloads.sourceforge.net/project/opencore-amr/opencore-amr/opencore-amr-${CURRENT_PACKAGE_VERSION}.tar.gz"
 
     execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
     execute make -j ${MJOBS}
     execute make install
 
-    build_done "opencore" "0.1.6"
+    build_done "opencore" "${CURRENT_PACKAGE_VERSION}"
   fi
 fi
 
@@ -1089,13 +1082,13 @@ if ! isLinux; then
 
   if build "lame" "3.100"; then
 
-    download "https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz" "lame-3.100.tar.gz"
+    download "https://downloads.sourceforge.net/project/lame/lame/3.100/lame-${CURRENT_PACKAGE_VERSION}.tar.gz"
 
     execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
     execute make -j ${MJOBS}
     execute make install
 
-    build_done "lame" "3.100"
+    build_done "lame" "${CURRENT_PACKAGE_VERSION}"
   fi
 fi
 
@@ -1103,26 +1096,26 @@ CONFIGURE_OPTIONS+=("--enable-libmp3lame")
 
 if build "opus" "1.4"; then
 
-  download "https://downloads.xiph.org/releases/opus/opus-1.4.tar.gz"
+  download "https://downloads.xiph.org/releases/opus/opus-${CURRENT_PACKAGE_VERSION}.tar.gz"
 
   execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
   execute make -j ${MJOBS}
   execute make install
 
-  build_done "opus" "1.4"
+  build_done "opus" "${CURRENT_PACKAGE_VERSION}"
 fi
 
 CONFIGURE_OPTIONS+=("--enable-libopus")
 
 if build "speex" "1.2.1"; then
 
-  download "https://ftp.osuosl.org/pub/xiph/releases/speex/speex-1.2.1.tar.gz"
+  download "https://ftp.osuosl.org/pub/xiph/releases/speex/speex-${CURRENT_PACKAGE_VERSION}.tar.gz"
 
   execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
   execute make -j ${MJOBS}
   execute make install
 
-  build_done "speex" "1.2.1"
+  build_done "speex" "${CURRENT_PACKAGE_VERSION}"
 fi
 
 CONFIGURE_OPTIONS+=("--enable-libspeex")
@@ -1131,18 +1124,18 @@ if ! isLinux; then
 
   if build "libogg" "1.3.5"; then
 
-    download "https://ftp.osuosl.org/pub/xiph/releases/ogg/libogg-1.3.5.tar.xz"
+    download "https://ftp.osuosl.org/pub/xiph/releases/ogg/libogg-${CURRENT_PACKAGE_VERSION}.tar.xz"
 
     execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static
     execute make -j ${MJOBS}
     execute make install
 
-    build_done "libogg" "1.3.5"
+    build_done "libogg" "${CURRENT_PACKAGE_VERSION}"
   fi
 
   if build "libvorbis" "1.3.7"; then
 
-    download "https://ftp.osuosl.org/pub/xiph/releases/vorbis/libvorbis-1.3.7.tar.gz"
+    download "https://ftp.osuosl.org/pub/xiph/releases/vorbis/libvorbis-${CURRENT_PACKAGE_VERSION}.tar.gz"
 
     if [[ "${TARGET_OS}" == "darwin" ]]; then
 
@@ -1153,7 +1146,7 @@ if ! isLinux; then
     execute make -j ${MJOBS}
     execute make install
 
-    build_done "libvorbis" "1.3.7"
+    build_done "libvorbis" "${CURRENT_PACKAGE_VERSION}"
   fi
 fi
 
@@ -1163,7 +1156,7 @@ if ! isLinux; then
 
   if build "libtheora" "1.1.1"; then
 
-    download "https://ftp.osuosl.org/pub/xiph/releases/theora/libtheora-1.1.1.tar.gz"
+    download "https://ftp.osuosl.org/pub/xiph/releases/theora/libtheora-${CURRENT_PACKAGE_VERSION}.tar.gz"
 
     sed "s/-fforce-addr//g" configure > configure.patched
     chmod +x configure.patched
@@ -1193,7 +1186,7 @@ if ! isLinux; then
     execute make -j ${MJOBS}
     execute make install
 
-    build_done "libtheora" "1.1.1"
+    build_done "libtheora" "${CURRENT_PACKAGE_VERSION}"
   fi
 fi
 
@@ -1201,15 +1194,15 @@ CONFIGURE_OPTIONS+=("--enable-libtheora")
 
 if ${NONFREE_AND_GPL}; then
 
-  if build "fdk_aac" "2.0.2"; then
+  if build "fdk_aac" "2.0.3"; then
 
-    download "https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-2.0.2.tar.gz" "fdk-aac-2.0.2.tar.gz"
+    download "https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-${CURRENT_PACKAGE_VERSION}.tar.gz" "fdk-aac-${CURRENT_PACKAGE_VERSION}.tar.gz"
 
     execute ./configure --prefix="${WORKSPACE}" --disable-shared --enable-static --enable-pic
     execute make -j ${MJOBS}
     execute make install
 
-    build_done "fdk_aac" "2.0.2"
+    build_done "fdk_aac" "${CURRENT_PACKAGE_VERSION}"
   fi
 
   CONFIGURE_OPTIONS+=("--enable-libfdk-aac")
