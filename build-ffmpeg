@@ -1094,7 +1094,7 @@ fi
 
 CONFIGURE_OPTIONS+=("--enable-libmp3lame")
 
-if build "opus" "1.4"; then
+if build "opus" "1.5.2"; then
 
   download "https://downloads.xiph.org/releases/opus/opus-${CURRENT_PACKAGE_VERSION}.tar.gz"
 
