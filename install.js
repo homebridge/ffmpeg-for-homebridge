@@ -38,7 +38,7 @@ async function getDownloadFileName() {
 
     case "darwin":
 
-      if(parseInt(os.release()) >= 22) {
+      if(parseInt(os.release()) >= 24) {
 
         switch(process.arch) {
 
@@ -68,16 +68,7 @@ async function getDownloadFileName() {
 
         case "x64":
 
-          switch(osReleaseEnv.VERSION_ID) {
-
-            case "24.04":
-
-              return "ffmpeg-ubuntu-24.04-x86_64.tar.gz";
-
-            default:
-
-              return "ffmpeg-alpine-x86_64.tar.gz";
-          }
+          return "ffmpeg-alpine-x86_64.tar.gz";
 
         case "arm":
 
