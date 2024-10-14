@@ -80,7 +80,7 @@ FFmpeg is built with the following configuration options:
     --enable-libtheora
     --enable-libvidstab
     --enable-libvorbis
-    --enable-libvpl                      # x86_64 Linux and Windows only
+    --enable-libvpl                      # Windows only
     --enable-libvpx                      # not available on arm32v7 Linux
     --enable-libwebp
     --enable-libx264
