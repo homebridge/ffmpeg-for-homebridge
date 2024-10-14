@@ -1,6 +1,6 @@
 {
   "name": "ffmpeg-for-homebridge",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Static FFmpeg binaries for Homebridge with support for audio (libfdk-aac) and hardware encoding (h264_v4l2m2m and h264_qsv).",
   "author": {
     "name": "The Homebridge Team",
