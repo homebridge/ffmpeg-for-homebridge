@@ -801,7 +801,8 @@ if ${NONFREE_AND_GPL}; then
   CONFIGURE_OPTIONS+=("--enable-libx264")
 fi
 
-if ${NONFREE_AND_GPL}; then
+# 32-bit ARM platforms like Raspberry Pi don't build x265 cleanly.
+if ${NONFREE_AND_GPL} && [[ ! "${TARGET_ARCH}" == "armv7l" ]] ; then
 
   if build "x265" "latest"; then
 
