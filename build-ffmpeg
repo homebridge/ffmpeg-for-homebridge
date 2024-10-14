@@ -801,12 +801,6 @@ if ${NONFREE_AND_GPL}; then
   CONFIGURE_OPTIONS+=("--enable-libx264")
 fi
 
-#TARGET_OS = alpine
-#TARGET_ARCH = arm32v7
-#OSTYPE = linux-musleabihf
-#
-# if ${NONFREE_AND_GPL} && [[ ! "${TARGET_ARCH}" == "arm"* ]]; then
-#if ${NONFREE_AND_GPL}; then
 if ${NONFREE_AND_GPL} && (isAppleSilicon || [[ ! "${TARGET_ARCH}" == "arm"* ]]) ; then
 
   if build "x265" "latest"; then
@@ -818,16 +812,6 @@ if ${NONFREE_AND_GPL} && (isAppleSilicon || [[ ! "${TARGET_ARCH}" == "arm"* ]]) 
 
       clone "https://bitbucket.org/multicoreware/x265_git.git" "x265-latest"
     fi
-#    if [[ "${TARGET_OS}" == "darwin" && "${TARGET_ARCH}" == "arm64" ]]; then
-#
-#      download "https://bitbucket.org/multicoreware/x265_git/get/931178347b3f73e40798fd5180209654536bbaa5.tar.gz" "x265-3.5.tar.gz" # This is actually 3.4 if looking at x265Versio
-#    elif [[ "${TARGET_ARCH}" == "arm"* ]]; then
-#
-#      download "https://github.com/videolan/x265/archive/Release_3.5.tar.gz" "x265-3.5.tar.gz" # This is actually 3.4 if looking at x265Version.txt
-#    else
-#
-#      clone "https://bitbucket.org/multicoreware/x265_git.git" "x265-latest"
-#    fi
 
     cd build/linux || exit
     execute cmake -G "Unix Makefiles" ../../source
@@ -957,7 +941,6 @@ if ${NONFREE_AND_GPL}; then
 fi
 
 if [[ ! "${TARGET_ARCH}" == "arm"* ]]; then
-#if [[ ! "${TARGET_OS}" == "raspbian" ]]; then
 
   if build "av1" "bcfe6fb"; then
 
@@ -1341,38 +1324,39 @@ fi
 
 if isLinux && [[ "${TARGET_ARCH}" == "x86_64" ]]; then
 
-  # Intel QSV support.
-  if build "oneVPL" "v2023.3.1"; then
-
-    download "https://github.com/oneapi-src/oneVPL/archive/refs/tags/v2023.3.1.tar.gz" "oneVPL-v2023.3.1.tar.gz"
-
-    make_dir build
-    cd build || exit
-
-    execute cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${WORKSPACE}" -DCMAKE_INSTALL_BINDIR=bin -DCMAKE_INSTALL_LIBDIR=lib \
-      -DBUILD_DISPATCHER=ON -DBUILD_DEV=ON -DBUILD_PREVIEW=OFF -DBUILD_TOOLS=OFF -DBUILD_TOOLS_ONEVPL_EXPERIMENTAL=OFF -DINSTALL_EXAMPLE_CODE=OFF \
-      -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF ..
-    execute cmake --build . --config Release
-    execute cmake --build . --config Release --target install
-
-    build_done "oneVPL" "v2023.3.1"
-  fi
-
-  CONFIGURE_OPTIONS+=("--enable-libvpl")
-
-  # Libva support.
-  if build "libva" "latest"; then
-
-    download "https://github.com/intel/libva/archive/refs/tags/2.20.0.tar.gz" "libva-2.20.0.tar.gz"
-    
-    execute env LIBTOOLIZE="${WORKSPACE}/bin/libtoolize" ./autogen.sh --prefix="${WORKSPACE}" --with-drivers-path="/usr/lib/x86_64-linux-gnu/dri" --enable-static --disable-shared
-    execute make -j ${MJOBS}
-    execute make install
-
-    build_done "libva" "2.20.0"
-  fi
-
-  CONFIGURE_OPTIONS+=("--enable-vaapi")
+#  Unfortunately, libva is broken in static builds of FFmpeg, making QSV out of reach for the time being.
+#  # Intel QSV support.
+#  if build "oneVPL" "v2023.3.1"; then
+#
+#    download "https://github.com/oneapi-src/oneVPL/archive/refs/tags/v2023.3.1.tar.gz" "oneVPL-v2023.3.1.tar.gz"
+#
+#    make_dir build
+#    cd build || exit
+#
+#    execute cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${WORKSPACE}" -DCMAKE_INSTALL_BINDIR=bin -DCMAKE_INSTALL_LIBDIR=lib \
+#      -DBUILD_DISPATCHER=ON -DBUILD_DEV=ON -DBUILD_PREVIEW=OFF -DBUILD_TOOLS=OFF -DBUILD_TOOLS_ONEVPL_EXPERIMENTAL=OFF -DINSTALL_EXAMPLE_CODE=OFF \
+#      -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF ..
+#    execute cmake --build . --config Release
+#    execute cmake --build . --config Release --target install
+#
+#    build_done "oneVPL" "v2023.3.1"
+#  fi
+#
+#  CONFIGURE_OPTIONS+=("--enable-libvpl")
+#
+#  # Libva support.
+#  if build "libva" "latest"; then
+#
+#    download "https://github.com/intel/libva/archive/refs/tags/2.20.0.tar.gz" "libva-2.20.0.tar.gz"
+#    
+#    execute env LIBTOOLIZE="${WORKSPACE}/bin/libtoolize" ./autogen.sh --prefix="${WORKSPACE}" --with-drivers-path="/usr/lib/x86_64-linux-gnu/dri" --enable-static --disable-shared
+#    execute make -j ${MJOBS}
+#    execute make install
+#
+#    build_done "libva" "2.20.0"
+#  fi
+#
+#  CONFIGURE_OPTIONS+=("--enable-vaapi")
 
   if command_exists "nvcc"; then
 
