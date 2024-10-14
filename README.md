@@ -16,7 +16,8 @@ This project provides static FFmpeg binaries for multiple platforms and architec
 Specifically, we provide:
 
 * Audio support using `libfdk-aac`.
-* Hardware-accelerated encoding support on Intel platforms using `h264_qsv` and hardware-accelerated encoding on Raspberry Pi 4+ using `h264_v4l2m2m`.
+* Hardware-accelerated encoding support on Intel platforms using `h264_qsv` **(Windows only)**.
+* Hardware-accelerated encoding support on Raspberry Pi 4+ using `h264_v4l2m2m`.
 * Hardware-accelerated encoding support on Apple platforms using `videotoolbox`.
 
 ## Supported Platforms
@@ -29,6 +30,7 @@ Specifically, we provide:
 | Windows 10 or newer                 | x86_64                         |
 
 > [!NOTE]
+> * **Intel Quick Sync Video is only supported on Windows. There are multiple known issues with `libva` that make it incompatible with static builds of FFmpeg. If you need QSV on Linux, we recommend looking at the [Jellyfin FFmpeg distribution](https://repo.jellyfin.org/?path=/ffmpeg) for distribution-specific releases. We hope to support QSV on Linux once these issues are addressed.**
 > * **Raspberry Pi 5 is currently unsupported. There are multiple known issues with FFmpeg and Raspberry Pi 5 that will hopefully be addressed by the respective teams in the future.**
 > * **Currently (October 2024), FFmpeg v7.1 appears to be somewhat broken for HEVC and H.264 decoding in some scenarios. We hope to support future FFmpeg LTS releases as they stabilize and mature.**
 
