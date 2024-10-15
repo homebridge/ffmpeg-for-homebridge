@@ -10,6 +10,8 @@ const get = require("simple-get");
 const tar = require("tar");
 
 const DOWNLOAD_RETRY_ATTEMPTS = 2;
+const MACOS_MINIMUM_SUPPORTED_VERSION = 23;
+const MACOS_MINIMUM_SUPPORTED_RELEASE = "Sonoma";
 
 function targetFfmpegRelease() {
 
@@ -222,18 +224,20 @@ async function install() {
   // Ensure the FFmpeg npm cache directory exists.
   ensureFfmpegCacheDir();
 
+  // Ensure we don't support versions of macOS that are too old.
+  if(os.platform() === "darwin" && parseInt(os.release()) < MACOS_MINIMUM_SUPPORTED_VERSION) {
+
+    console.error("ffmpeg-for-homebridge: macOS versions older than " + MACOS_MINIMUM_SUPPORTED_RELEASE + " are not supported, you will need to install a working version of FFmpeg manually.");
+
+    process.exit(0);
+  }
+
   // Determine the download file name for the current platform.
   const ffmpegDownloadFileName = await getDownloadFileName();
 
   if(!ffmpegDownloadFileName) {
 
-    if(os.platform() === "darwin" && parseInt(os.release()) < 24) {
-
-      console.log("ffmpeg-for-homebridge: macOS versions older than 15 (Sequoia) are not supported, you will need to install a working version of FFmpeg manually.");
-    } else {
-
-      console.log("ffmpeg-for-homebridge: %s %s is not supported, you will need to install a working version of FFmpeg manually.", os.platform, process.arch);
-    }
+    console.error("ffmpeg-for-homebridge: %s %s is not supported, you will need to install a working version of FFmpeg manually.", os.platform, process.arch);
 
     process.exit(0);
   }
