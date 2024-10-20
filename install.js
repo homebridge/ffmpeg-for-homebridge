@@ -42,21 +42,18 @@ async function getDownloadFileName() {
 
     case "darwin":
 
-      if(parseInt(os.release()) >= 24) {
+      switch(process.arch) {
 
-        switch(process.arch) {
+        case "x64":
 
-          case "x64":
+          return "ffmpeg-darwin-x86_64.tar.gz";
 
-            return "ffmpeg-darwin-x86_64.tar.gz";
+        case "arm64":
 
-          case "arm64":
+          return "ffmpeg-darwin-arm64.tar.gz";
 
-            return "ffmpeg-darwin-arm64.tar.gz";
-
-          default:
-            return null;
-        }
+        default:
+          return null;
       }
 
     case "linux":
@@ -225,7 +222,7 @@ async function install() {
   ensureFfmpegCacheDir();
 
   // Ensure we don't support versions of macOS that are too old.
-  if(os.platform() === "darwin" && parseInt(os.release()) < MACOS_MINIMUM_SUPPORTED_VERSION) {
+  if((os.platform().toString() === "darwin") && (parseInt(os.release().split(".")[0]) < MACOS_MINIMUM_SUPPORTED_VERSION)) {
 
     console.error("ffmpeg-for-homebridge: macOS versions older than " + MACOS_MINIMUM_SUPPORTED_RELEASE + " are not supported, you will need to install a working version of FFmpeg manually.");
 
