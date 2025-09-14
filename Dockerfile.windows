@@ -1,52 +1,54 @@
-ARG BASE_IMAGE
+# syntax=docker/dockerfile:1.7
+#
+# Copyright(C) 2019-2025, The Homebridge Team. All rights reserved.
+#
+# Dockerfile.windows: create a cross-compilation environment to build FFmpeg statically for Windows using a Linux host system.
 
-FROM --platform=amd64 ${BASE_IMAGE:-ubuntu:latest}
+# Define the base image that will be used for the build environment.
+ARG BASE_IMAGE=ubuntu:latest
+
+# Define the platform where the Docker build is running.
+ARG BUILDPLATFORM=linux/amd64
+
+# Define the target platform for the container. Since we're cross-compiling to Windows, the container itself still runs on Linux.
+ARG TARGETPLATFORM=linux/amd64
+
+# Start from the specified base image to create our build environment.
+FROM ${BASE_IMAGE}
+
+# Disable interactive prompts during package installation. This ensures the build process can run unattended without waiting for user input.
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && \
-    apt-get install -y \
-    autoconf \
-    autoconf-archive \
-    autogen \
-    automake \
-    bison \
-    bzip2 \
-    clang \
-    cmake \
-    curl \
-    cvs \
-    ed \
-    flex \
-    g++ \
-    gcc \
-    git \
-    gperf \
-    libtool \
-    make \
-    meson \
-    nasm \
-    p7zip-full \
-    pax \
-    pkg-config \
-    python-is-python3 \
-    python3 \
-    python3-setuptools \
-    ragel \
-    subversion \
-    texinfo \
-    unzip \
-    wget \
-    yasm \
-    zlib1g-dev
+# Define the FFmpeg version to build. This argument must be provided during build time to specify which release to compile.
+ARG FFMPEG_VERSION
 
+# Install our dependencies ahead of building our FFmpeg release.
+RUN apt-get update && apt-get install -y autoconf autoconf-archive autogen automake bison bzip2 clang cmake curl cvs ed flex g++ gcc git gperf libltdl-dev libtool make \
+  meson nasm p7zip-full pax pkg-config python-is-python3 python3 python3-setuptools ragel subversion texinfo unzip wget yasm zlib1g-dev
+
+# Grab the latest ffmpeg-windows-build-helpers build script.
 RUN git clone https://github.com/rdp/ffmpeg-windows-build-helpers.git /ffmpeg-windows-build-helpers
+COPY windows-ffmpeg-build.patch /
 
+# Set our working directory to /ffmpeg-windows-build-helpers where all the magic happens.
 WORKDIR /ffmpeg-windows-build-helpers
 
+# Apply our patch to address some build issues and tailor for our needs.
+RUN patch -s -p0 < ../windows-ffmpeg-build.patch
+
+# Download the specified FFmpeg release.
+RUN curl -L --silent -o "FFmpeg-release-${FFMPEG_VERSION}.tar.gz" "https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz"
+RUN mkdir -p "FFmpeg-release-${FFMPEG_VERSION}"
+RUN tar -xf "FFmpeg-release-${FFMPEG_VERSION}.tar.gz" -C "FFmpeg-release-${FFMPEG_VERSION}" --strip-components 1
+
+# Set the output directory environment variable where the compiled FFmpeg executable will be copied after the build completes.
 ENV OUTPUTDIR=/build
 
-CMD ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=n --build-ffmpeg-static=y --disable-nonfree=n --build-intel-qsv=y --compiler-flavors=win64 --enable-gpl=y \
-  && mkdir -p $OUTPUTDIR \
-  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffmpeg.exe $OUTPUTDIR/ffmpeg.exe \
-  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffprobe.exe $OUTPUTDIR/ffprobe.exe \
-  && cp -R -f ./sandbox/win64/ffmpeg_git_with_fdk_aac/ffplay.exe $OUTPUTDIR/ffplay.exe
+# Define a volume mount point at /build that we can copy our binary from later.
+VOLUME ["/build"]
+
+# Our build command for FFmpeg.
+CMD [ "bash", "-lc", "set -euxo pipefail; \
+  ./cross_compile_ffmpeg.sh --ffmpeg-source-dir=\"$(pwd)/FFmpeg-release-${FFMPEG_VERSION}\" --build-ffmpeg-shared=n --build-ffmpeg-static=y --disable-nonfree=n \
+  --build-intel-qsv=y --compiler-flavors=win64 --enable-gpl=y --gcc-cpu-count=$(nproc) && mkdir -p \"$OUTPUTDIR\" && \
+  cp -f \"$(pwd)/FFmpeg-release-${FFMPEG_VERSION}/ffmpeg.exe\" \"$OUTPUTDIR/ffmpeg.exe\"" ]

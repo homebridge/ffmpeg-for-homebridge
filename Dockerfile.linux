@@ -1,20 +1,54 @@
-ARG BASE_IMAGE
-ARG EMULATE_ARCH=aarch64
+# syntax=docker/dockerfile:1.7
+#
+# Copyright(C) 2019-2025, The Homebridge Team. All rights reserved.
+#
+# Dockerfile.linux: create a cross-compilation environment to build FFmpeg statically for multiple CPU architectures, using QEMU emulation only when needed.
 
-FROM --platform=amd64 multiarch/qemu-user-static:x86_64-${EMULATE_ARCH} as qemu
-FROM --platform=amd64 ${BASE_IMAGE}
-ARG EMULATE_ARCH
+# Define the base image that will be used for the build environment.
+ARG BASE_IMAGE=alpine:3.20
 
-COPY --from=qemu /usr/bin/qemu-${EMULATE_ARCH}-static /usr/bin
-COPY prepare-build /
+# Define the platform where the Docker build is running.
+ARG BUILDPLATFORM=linux/amd64
 
-RUN /prepare-build
+# Define the target platform for the container. This gets reconciled against BUILDPLATFORM to determine if we're cross-compiling or not. If we are, we use QEMU.
+ARG TARGETPLATFORM=linux/amd64
 
-COPY build-ffmpeg /
+# Pass through our command-line arguments to the next stage.
+ARG TARGETARCH
 
-ENV SKIPINSTALL=yes VERBOSE=yes
+# First, we extract the QEMU static binary for the target architecture. We use the multiarch/qemu-user-static image which contains statically compiled QEMU binaries for
+# various architectures.
+FROM --platform=${BUILDPLATFORM} multiarch/qemu-user-static:latest AS qemu
 
+# Next, we set up the main build environment. We start from the specified base image and configure it for cross-compilation.
+FROM --platform=${TARGETPLATFORM} ${BASE_IMAGE}
+
+# Pass through our command-line arguments.
+ARG BUILDPLATFORM
+ARG TARGETPLATFORM
+ARG TARGETARCH
+
+# Copy the QEMU static binary from the first stage into our build environment. This binary enables transparent emulation of the target architecture, allowing us to run
+# binaries compiled for different architectures as if they were native, when needed.
+COPY --from=qemu /usr/bin/qemu-*-static /usr/bin/
+
+# If we're building on the same architecture as our target, we remove QEMU so we can run natively.
+RUN if [ "${TARGETPLATFORM}" = "${BUILDPLATFORM}" ]; then rm -f /usr/bin/qemu-*-static; fi
+
+# Install our dependencies ahead of building our FFmpeg release.
+RUN apk add --no-cache autoconf automake bash cmake curl diffutils g++ gcc gettext-static giflib-static git lame-dev libogg-static libpng-dev libpng-static \
+  libtheora-dev libtheora-static libtool libvorbis-dev libvorbis-static libwebp-dev libwebp-static linux-headers m4 make meson nasm opencore-amr-dev openssl-dev \
+  openssl-libs-static pcre-dev perl python3 samurai tar xvidcore-dev xvidcore-static xz yasm zlib-static
+
+# Copy over our FFmpeg build script.
+COPY build-ffmpeg /build-ffmpeg
+RUN chmod +x /build-ffmpeg
+
+# Define a volume mount point at /build that we can copy our binary from later.
 VOLUME /build
+
+# Set our working directory to /build where all the magic happens.
 WORKDIR /build
 
-CMD /build-ffmpeg --build --enable-gpl-and-non-free --full-static
+# Our build command for FFmpeg.
+CMD ["/build-ffmpeg", "--build", "--enable-gpl-and-non-free", "--full-static"]

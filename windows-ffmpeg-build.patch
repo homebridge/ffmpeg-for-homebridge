@@ -1,0 +1,112 @@
+--- cross_compile_ffmpeg.sh.orig	2025-09-11 17:48:31
++++ cross_compile_ffmpeg.sh	2025-09-14 08:17:04
+@@ -885,20 +885,14 @@
+   cd ..
+ }
+ 
+-build_intel_qsv_mfx() { # disableable via command line switch...
+-  do_git_checkout https://github.com/lu-zero/mfx_dispatch.git mfx_dispatch_git 2cd279f # lu-zero?? oh well seems somewhat supported...
+-  cd mfx_dispatch_git
+-    if [[ ! -f "configure" ]]; then
+-      autoreconf -fiv || exit 1
+-      automake --add-missing || exit 1
+-    fi
+-    if [[ $compiler_flavors == "native" && $OSTYPE != darwin* ]]; then
+-      unset PKG_CONFIG_LIBDIR # allow mfx_dispatch to use libva-dev or some odd on linux...not sure for OS X so just disable it :)
+-      generic_configure_make_install
+-      export PKG_CONFIG_LIBDIR=
+-    else
+-      generic_configure_make_install
+-    fi
++build_libvpl () {
++  do_git_checkout https://github.com/intel/libvpl.git libvpl_git f8d9891 # beyond this commit -lstdc++ no longer used and ffmpeg no longer sees it without it on the .pc
++  cd libvpl_git
++	if [ "$bits_target" = "32" ]; then
++	  apply_patch "https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-libvpl/0003-cmake-fix-32bit-install.patch" -p1
++	fi
++   	do_cmake "-S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DINSTALL_EXAMPLES=OFF -DINSTALL_DEV=ON -DBUILD_EXPERIMENTAL=OFF" 
++  	do_ninja_and_ninja_install
+   cd ..
+ }
+ 
+@@ -1517,11 +1511,13 @@
+         sed -i.bak "/WIN32$/,+4d" src/udfread.c # Fix WinXP incompatibility.
+       fi
+       if [[ ! -f src/udfread-version.h ]]; then
+-        generic_configure # Generate 'udfread-version.h', or building Libbluray fails otherwise.
++        # generic_configure # Generate 'udfread-version.h', or building Libbluray fails otherwise.
++        generic_meson
+       fi
+     cd ../..
+-    generic_configure "--disable-examples --disable-bdjava-jar"
+-    do_make_and_make_install "CPPFLAGS=\"-Ddec_init=libbr_dec_init\""
++    # generic_configure "--disable-examples --disable-bdjava-jar"
++    # do_make_and_make_install "CPPFLAGS=\"-Ddec_init=libbr_dec_init\""
++    generic_meson
+   cd ..
+ }
+ 
+@@ -1547,7 +1543,8 @@
+   # download_and_unpack_file http://www.festvox.org/flite/packed/flite-2.1/flite-2.1-release.tar.bz2
+   # original link is not working so using a substitute
+   # from a trusted source
+-  download_and_unpack_file http://deb.debian.org/debian/pool/main/f/flite/flite_2.1-release.orig.tar.bz2 flite-2.1-release
++  # download_and_unpack_file http://deb.debian.org/debian/pool/main/f/flite/flite_2.1-release.orig.tar.bz2 flite-2.1-release
++  download_and_unpack_file http://www.festvox.org/flite/packed/flite-2.1/flite-2.1-release.tar.bz2 flite-2.1-release
+   cd flite-2.1-release
+     apply_patch file://$patch_dir/flite-2.1.0_mingw-w64-fixes.patch
+     if [[ ! -f main/Makefile.bak ]]; then
+@@ -2413,7 +2410,7 @@
+       local arch=x86_64
+     fi
+ 
+-    init_options="--pkg-config=pkg-config --pkg-config-flags=--static --extra-version=ffmpeg-windows-build-helpers --enable-version3 --disable-debug --disable-w32threads"
++    init_options="--pkg-config=pkg-config --pkg-config-flags=--static --extra-version=${EXTRA_VERSION} --enable-hardcoded-tables --enable-version3 --disable-debug --disable-w32threads"
+     if [[ $compiler_flavors != "native" ]]; then
+       init_options+=" --arch=$arch --target-os=mingw32 --cross-prefix=$cross_prefix"
+     else
+@@ -2433,12 +2430,12 @@
+     config_options+=" --enable-fontconfig"
+     config_options+=" --enable-gmp"
+     config_options+=" --enable-libass"
+-    config_options+=" --enable-libbluray"
++    # config_options+=" --enable-libbluray"
+     config_options+=" --enable-libbs2b"
+     config_options+=" --enable-libflite"
+     config_options+=" --enable-libfreetype"
+     config_options+=" --enable-libfribidi"
+-    config_options+=" --enable-libharfbuzz"
++    # config_options+=" --enable-libharfbuzz"
+     config_options+=" --enable-filter=drawtext"
+     config_options+=" --enable-libgme"
+     config_options+=" --enable-libgsm"
+@@ -2538,9 +2535,9 @@
+     fi
+ 
+     if [[ $build_intel_qsv = y && $compiler_flavors != "native" ]]; then # Broken for native builds right now: https://github.com/lu-zero/mfx_dispatch/issues/71
+-      config_options+=" --enable-libmfx"
++      config_options+=" --enable-libvpl"
+     else
+-      config_options+=" --disable-libmfx"
++      config_options+=" --disable-libvpl"
+     fi
+     
+     if [[ $ffmpeg_git_checkout_version != *"n6.0"* ]] && [[ $ffmpeg_git_checkout_version != *"n5"* ]] && [[ $ffmpeg_git_checkout_version != *"n4"* ]] && [[ $ffmpeg_git_checkout_version != *"n3"* ]] && [[ $ffmpeg_git_checkout_version != *"n2"* ]]; then
+@@ -2606,7 +2603,7 @@
+     if [[ $1 == "static" ]]; then
+      # nb we can just modify this every time, it getes recreated, above..
+       if [[ $build_intel_qsv = y  && $compiler_flavors != "native" ]]; then # Broken for native builds right now: https://github.com/lu-zero/mfx_dispatch/issues/71
+-        sed -i.bak 's/-lavutil -pthread -lm /-lavutil -pthread -lm -lmfx -lstdc++ -lmpg123 -lshlwapi /' "$PKG_CONFIG_PATH/libavutil.pc"
++        sed -i.bak 's/-lavutil -pthread -lm /-lavutil -pthread -lm -lvpl -lstdc++ -lmpg123 -lshlwapi /' "$PKG_CONFIG_PATH/libavutil.pc"
+       else
+         sed -i.bak 's/-lavutil -pthread -lm /-lavutil -pthread -lm -lmpg123 -lshlwapi /' "$PKG_CONFIG_PATH/libavutil.pc"
+       fi
+@@ -2717,7 +2714,7 @@
+     build_amd_amf_headers
+   fi
+   if [[ $build_intel_qsv = y && $compiler_flavors != "native" ]]; then # Broken for native builds right now: https://github.com/lu-zero/mfx_dispatch/issues/71
+-    build_intel_qsv_mfx
++    build_libvpl
+   fi
+   build_nv_headers
+   build_libzimg # Uses dlfcn.

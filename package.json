@@ -1,7 +1,7 @@
 {
   "name": "ffmpeg-for-homebridge",
-  "version": "2.1.7",
-  "description": "Static FFmpeg binaries for Homebridge with support for audio (libfdk-aac) and hardware encoding (h264_v4l2m2m and h264_qsv).",
+  "version": "2.2.0",
+  "description": "Static FFmpeg binaries for Homebridge camera plugins to support HomeKit video streaming (AAC-ELD and H.264) and hardware-accelerated transcoding (QSV, V4L2M2M, VideoToolbox).",
   "author": {
     "name": "The Homebridge Team",
     "url": "https://github.com/homebridge"
@@ -15,7 +15,7 @@
     "url": "https://github.com/homebridge/ffmpeg-for-homebridge/issues"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "main": "index.js",
   "typings": "index.d.ts",
@@ -34,11 +34,11 @@
     "homekit",
     "audio",
     "libfdk-aac",
-    "h264_omx"
+    "h264_qsv",
+    "h264_v4l2m2m",
+    "videotoolbox"
   ],
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "simple-get": "^4.0.1",
     "tar": "^7.4.3"
   }
 }
