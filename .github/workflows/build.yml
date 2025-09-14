@@ -1,146 +1,279 @@
 # build.yml: Build FFmpeg binaries.
 #
-name: 'Build FFmpeg'
+name: "Build FFmpeg binaries"
 
 on:
   workflow_dispatch:
+    inputs:
+
+      alpine_aarch64:
+        description: "Linux (ARM64 / aarch64)"
+        type: boolean
+        default: true
+
+      alpine_arm32v7:
+        description: "Linux (ARMv7 / arm32v7)"
+        type: boolean
+        default: true
+
+      alpine_x86_64:
+        description: "Linux (Intel / x86_64)"
+        type: boolean
+        default: true
+
+      darwin_arm64:
+        description: "macOS (Apple Silicon / arm64)"
+        type: boolean
+        default: true
+
+      darwin_x86_64:
+        description: "macOS (Intel / x86_64)"
+        type: boolean
+        default: false
+
+      windows_x86_64:
+        description: "Windows (Intel / x86_64)"
+        type: boolean
+        default: true
+
+env:
+
+  # Which version of FFmpeg we want to build. The downstream scripts all inherit from this value.
+  FFMPEG_VERSION: "8.0"
 
 jobs:
 
+  plan:
+
+    name: "Select targets"
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+
+    steps:
+
+      - id: select
+        shell: bash
+        run: |
+
+          set -euo pipefail
+
+          # Our catalog of build targets.
+          read -r -d '' CATALOG <<'JSON' || true
+          {
+
+            "alpine-aarch64": {
+
+              "name": "alpine-aarch64",
+              "os": "ubuntu-24.04-arm",
+              "BASE_IMAGE": "library/alpine:latest",
+              "BUILDPLATFORM": "linux/aarch64",
+              "DOCKERFILE": "linux",
+              "TARGET_ARCH": "aarch64",
+              "TARGET_OS": "alpine",
+              "TARGETPLATFORM": "linux/aarch64"
+            },
+
+            "alpine-arm32v7": {
+
+              "name": "alpine-arm32v7",
+              "os": "ubuntu-latest",
+              "BASE_IMAGE": "library/alpine:latest",
+              "BUILDPLATFORM": "linux/x86_64",
+              "DOCKERFILE": "linux",
+              "TARGET_ARCH": "armv7l",
+              "TARGET_OS": "alpine",
+              "TARGETPLATFORM": "linux/arm/v7"
+            },
+
+            "alpine-x86_64": {
+
+              "name": "alpine-x86_64",
+              "os": "ubuntu-latest",
+              "BASE_IMAGE": "library/alpine:latest",
+              "BUILDPLATFORM": "linux/x86_64",
+              "DOCKERFILE": "linux",
+              "TARGET_ARCH": "x86_64",
+              "TARGET_OS": "alpine",
+              "TARGETPLATFORM": "linux/x86_64"
+            },
+
+            "darwin-arm64": {
+
+              "name": "darwin-arm64",
+              "os": "macos-15"
+            },
+
+            "darwin-x86_64": {
+
+              "name": "darwin-x86_64",
+              "os": "macos-15-large"
+            },
+
+            "windows-x86_64": {
+
+              "name": "windows-x86_64",
+              "os": "ubuntu-latest",
+              "BASE_IMAGE": "library/ubuntu:jammy",
+              "BUILDPLATFORM": "linux/x86_64",
+              "DOCKERFILE": "windows",
+              "TARGETPLATFORM": "linux/x86_64"
+            }
+          }
+          JSON
+
+          # Decode which targets we've elected to build.
+          SELECTED=()
+
+          add_unique() {
+
+            local i="$1"
+
+            for e in "${SELECTED[@]-}"; do [[ "$e" == "$i" ]] && return; done
+
+            SELECTED+=("$i")
+          }
+
+          [[ "${{ github.event.inputs.alpine_aarch64 }}"  == 'true' ]] && add_unique alpine-aarch64
+          [[ "${{ github.event.inputs.alpine_arm32v7 }}" == 'true' ]] && add_unique alpine-arm32v7
+          [[ "${{ github.event.inputs.alpine_x86_64 }}"  == 'true' ]] && add_unique alpine-x86_64
+          [[ "${{ github.event.inputs.darwin_arm64 }}"   == 'true' ]] && add_unique darwin-arm64
+          [[ "${{ github.event.inputs.darwin_x86_64 }}"  == 'true' ]] && add_unique darwin-x86_64
+          [[ "${{ github.event.inputs.windows_x86_64 }}" == 'true' ]] && add_unique windows-x86_64
+
+          if [[ ${#SELECTED[@]} -eq 0 ]]; then
+
+            echo "::error::No targets selected. Please check at least one target."
+
+            exit 1
+          fi
+
+          # Next we build a JSON array catalog of settings for all our targets.
+          sel_json="$(printf '%s\n' "${SELECTED[@]}" | jq -R . | jq -s -c .)"
+
+          # Now we filter the selected targets from our target catalog.
+          matrix="$(jq -c --argjson sel "${sel_json}" '[$sel[] as $k | .[$k]]' <<< "${CATALOG}")"
+
+          # Output our final matrix recipe to build.
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
+
   build:
-    name: 'Build FFmpeg'
+
+    name: "Build FFmpeg"
+    needs: plan
     runs-on: ${{ matrix.os }}
     continue-on-error: true
 
     strategy:
 
       matrix:
-
-        name: [
-          alpine-aarch64,
-          alpine-arm32v7,
-          alpine-x86_64,
-          darwin-arm64,
-          darwin-x86_64,
-          windows-x86_64
-        ]
-
-        include:
-          # Build for arm v8 64-bit Linux environments.
-          - name: alpine-aarch64
-            os: ubuntu-latest
-            BASE_IMAGE: arm64v8/alpine:latest
-            DOCKERFILE: linux
-            EMULATE_ARCH: aarch64
-            TARGET_ARCH: aarch64
-            TARGET_OS: alpine
-
-          # Build for arm v7 32-bit Linux environments.
-          - name: alpine-arm32v7
-            os: ubuntu-latest
-            BASE_IMAGE: arm32v7/alpine:latest
-            DOCKERFILE: linux
-            EMULATE_ARCH: arm
-            TARGET_ARCH: arm32v7
-            TARGET_OS: alpine
-
-          # Build for Intel 64-bit Linux environments.
-          - name: alpine-x86_64
-            os: ubuntu-latest
-            BASE_IMAGE: library/alpine:latest
-            DOCKERFILE: linux
-            # This is intentional.
-            EMULATE_ARCH: aarch64
-            TARGET_ARCH: x86_64
-            TARGET_OS: alpine
-
-          # Build for Apple Silicon macOS environments.
-          - name: darwin-arm64
-            os: macos-15
-
-          # Build for Intel macOS environments.
-          - name: darwin-x86_64
-            os: macos-15-large
-
-          # Build for Intel 64-bit Windows environments.
-          - name: windows-x86_64
-            os: ubuntu-latest
-            BASE_IMAGE: library/ubuntu:latest
-            DOCKERFILE: windows
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
 
     steps:
-    - uses: actions/checkout@v4
-    - name: 'Caching workspace.'
-      id: cache
-      uses: actions/cache@v4
-      with:
 
-        path: build
-        key: ${{ matrix.name }}-cache
+      - uses: actions/checkout@v4
 
-    # Docker image build.
-    - name: 'Docker: creating the build image.'
-      if: runner.os == 'Linux'
-      run: |
+      - name: "Caching workspace (Linux)."
+        if: runner.os == 'Linux' && matrix.DOCKERFILE != 'windows'
+        id: cache-linux
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: ${{ matrix.name }}-${{ env.FFMPEG_VERSION }}-${{ hashFiles('build-ffmpeg', 'Dockerfile.linux') }}
 
-        # Configure QEMU to register handlers for our target architectures.
-        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - name: "Caching workspace (macOS)."
+        if: runner.os == 'macOS'
+        id: cache-macos
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: ${{ matrix.name }}-${{ env.FFMPEG_VERSION }}-${{ hashFiles('build-ffmpeg', 'build-macOS.sh') }}
 
-        # Build the image that will become our build environment.
-        docker build --build-arg BASE_IMAGE=${{ matrix.BASE_IMAGE }} --build-arg EMULATE_ARCH=${{ matrix.EMULATE_ARCH }} -f Dockerfile.${{ matrix.DOCKERFILE }} -t ffmpeg-builder-${{ matrix.name }} .
+      # Docker image creation for our non-macOS runners.
+      - name: "Docker: creating the build image."
+        if: runner.os == 'Linux'
+        run: |
 
-    # Docker image build.
-    - name: 'Docker: building the FFmpeg binary.'
-      if: runner.os == 'Linux'
-      run: |
+          set -euo pipefail
 
-        mkdir -p build
+          # Configure QEMU to register handlers for our target architectures.
+          docker run --privileged --rm tonistiigi/binfmt --install all
 
-        # Start the build environment for our requested target.
-        docker run -v $(pwd)/build:/build -e TARGET_OS=${{ matrix.TARGET_OS }} -e TARGET_BUILD_ARCH=${{ matrix.TARGET_ARCH }} ffmpeg-builder-${{ matrix.name }}
+          # Build the image that will become our build environment.
+          docker buildx create --name ffmpeg-builder-${{ matrix.name }} --driver docker-container --use
+          docker buildx build \
+            --builder ffmpeg-builder-${{ matrix.name }} \
+            --platform ${{ matrix.TARGETPLATFORM }} \
+            --build-arg BASE_IMAGE=${{ matrix.BASE_IMAGE }} \
+            --build-arg BUILDPLATFORM=${{ matrix.BUILDPLATFORM }} \
+            --build-arg FFMPEG_VERSION=${{ env.FFMPEG_VERSION }} \
+            --build-arg TARGETPLATFORM=${{ matrix.TARGETPLATFORM }} \
+            --load \
+            -t ffmpeg-builder-${{ matrix.name }} \
+            -f Dockerfile.${{ matrix.DOCKERFILE }} .
 
-        # Fix any permissions issues that may have arisen due to containerization.
-        sudo chown -R $USER:$USER build
+      # Build our binaries using the Docker images we've created for non-macOS runners.
+      - name: "Docker: building FFmpeg."
+        if: runner.os == 'Linux'
+        run: |
 
-    # macOS Builds.
-    - name: 'macOS: building the FFmpeg binary.'
-      if: runner.os == 'macOS'
-      run: |
+          set -euo pipefail
+          mkdir -p build
 
-        mkdir -p build
+          # Start the build environment for our requested target.
+          docker run --rm --platform=${{ matrix.TARGETPLATFORM }} \
+            -e EXTRA_VERSION="homebridge-${{ (matrix.TARGET_OS && matrix.TARGET_ARCH && format('{0}-{1}', matrix.TARGET_OS, matrix.TARGET_ARCH)) ||
+              matrix.name }}-static" \
+            -e FFMPEG_VERSION=${{ env.FFMPEG_VERSION }} \
+            -e TARGET_OS=${{ matrix.TARGET_OS }} \
+            -e TARGET_ARCH=${{ matrix.TARGET_ARCH }} \
+            -v "$(pwd)"/build:/build \
+            ffmpeg-builder-${{ matrix.name }}
 
-        # Execute the build script.
-        cd build && SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg --build --enable-gpl-and-non-free
+          # Fix any permissions issues that may have arisen due to containerization.
+          sudo chown -R "$USER":"$USER" build
 
-    # Package our binaries for non-Windows operating systems.
-    - name: 'Linux and macOS: packaging the binary.'
-      if: matrix.DOCKERFILE != 'windows'
-      run: |
+      # Build macOS binaries.
+      - name: "macOS: building FFmpeg."
+        if: runner.os == 'macOS'
+        run: |
 
-        mkdir -p package/usr/local/bin/
+          set -euo pipefail
+          mkdir -p build
 
-        # Emulate the filesystem hierarchy so it's easily discoverable in a user's path environment variable.
-        cp build/workspace/bin/ffmpeg package/usr/local/bin/ffmpeg
+          # Execute the build script.
+          cd build && EXTRA_VERSION="homebridge-${{ matrix.name }}" SKIPINSTALL=yes VERBOSE=yes ../build-ffmpeg --build --enable-gpl-and-non-free
 
-        # Now we package it all up.
-        tar -C package -zcvf ffmpeg-${{ matrix.name }}.tar.gz .
+      # Package our binaries for non-Windows operating systems.
+      - name: "Linux and macOS: packaging FFmpeg."
+        if: matrix.DOCKERFILE != 'windows'
+        run: |
 
-    # Package our binaries for Windows.
-    - name: 'Windows: packaging the binary.'
-      if: matrix.DOCKERFILE == 'windows'
-      run: |
+          set -euo pipefail
+          mkdir -p package/usr/local/bin/
 
-        # Copy the binary we're looking for and we are done.
-        cp build/ffmpeg.exe .
+          # Emulate the filesystem hierarchy so it's easily discoverable in a user's PATH.
+          cp build/workspace/bin/ffmpeg package/usr/local/bin/ffmpeg
 
-    # Upload the packaged asset as an artifact.
-    - name: 'Uploading the packaged asset.'
-      uses: actions/upload-artifact@v4
-      with:
+          # Package it up.
+          tar -C package -zcvf ffmpeg-${{ matrix.name }}.tar.gz .
 
-        name: ffmpeg-${{ matrix.name }}
-        path: |
+      # Package our binaries for Windows.
+      - name: "Windows: packaging FFmpeg."
+        if: matrix.DOCKERFILE == 'windows'
+        run: |
 
-          ffmpeg-${{ matrix.name }}.tar.gz
-          ffmpeg.exe
+          set -euo pipefail
 
+          # Copy the binary we're looking for and we are done.
+          cp build/ffmpeg.exe .
+
+      # Upload the packaged asset as an artifact.
+      - name: "Uploading the packaged asset."
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-${{ matrix.name }}
+          path: |
+            ffmpeg-${{ matrix.name }}.tar.gz
+            ffmpeg.exe
+          if-no-files-found: warn
