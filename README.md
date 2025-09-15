@@ -64,7 +64,7 @@ Download the `ffmpeg.exe` file from the [releases page](https://github.com/homeb
 The current version is based on FFmpeg 8 and built with the following configuration options:
 
 ```bash
-    # Common to all platforms
+    # Common to all platforms.
     --disable-debug
     --disable-shared
     --enable-gpl
@@ -102,7 +102,7 @@ The current version is based on FFmpeg 8 and built with the following configurat
     --enable-pthreads                  # not on Windows
     --enable-videotoolbox              # macOS only
 
-    # Windows-only extras
+    # Windows-only extras.
     --disable-w32threads
     --enable-avisynth
     --enable-decklink
