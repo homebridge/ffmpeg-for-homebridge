@@ -55,6 +55,20 @@ jobs:
     # Ensure we have a successful build first.
     needs: build
 
-    # Publish.
-    run: npm publish --access public --provenance
+    # Specify the environment we're going to publish in.
+    runs-on: ubuntu-latest
+
+    # Execute the publish activities.
+    steps:
+      - name: Checkout the repository.
+        uses: actions/checkout@v4
+
+      - name: Setup the node environment.
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm.
+        run: npm publish --access public --provenance
 
