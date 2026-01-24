@@ -231,7 +231,7 @@ function performDownload(downloadUrl, tempFile, ffmpegDownloadPath, redirectCoun
     const request = https.get(options, (response) => {
 
       // Handle redirect responses (3xx status codes). GitHub often redirects to CDN servers, so we need to follow these redirects to get to the actual file.
-      if(response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+      if((response.statusCode >= 300) && (response.statusCode < 400) && response.headers.location) {
 
         // Check if we've exceeded the maximum number of redirects. This prevents infinite redirect loops that could occur with misconfigured servers.
         if(redirectCount >= MAX_REDIRECTS) {
@@ -396,7 +396,7 @@ function binaryOk(ffmpegTempPath) {
     child_process.execSync(ffmpegTempPath + " -buildconf");
 
     return true;
-  } catch (e) {
+  } catch(e) {
 
     // If the execution fails for any reason, the binary is not usable on this system.
     return false;
@@ -439,7 +439,7 @@ async function install() {
 
   if(!ffmpegDownloadFileName) {
 
-    console.error("ffmpeg-for-homebridge: " + os.platform + " " + process.arch + " is not supported, you will need to install a working version of FFmpeg manually.");
+    console.error("ffmpeg-for-homebridge: " + os.platform() + " " + process.arch + " is not supported, you will need to install a working version of FFmpeg manually.");
 
     process.exit(0);
   }
@@ -468,11 +468,11 @@ async function install() {
       // Extract the FFmpeg binary from the tar.gz archive. The binary is nested several directories deep, so we strip those path components during extraction.
       await tar.x({
 
-        file: ffmpegDownloadPath,
         C: ffmpegCache(),
+        file: ffmpegDownloadPath,
         strip: TAR_STRIP_COMPONENTS
       });
-    } catch (e) {
+    } catch(e) {
 
       console.error(e);
       console.error("An error occurred while extracting the downloaded FFmpeg binary.");
@@ -500,8 +500,9 @@ async function install() {
 
     displayErrorMessage();
 
-    // Delete the cached download since it doesn't work on this system. This allows trying a different version or manual installation.
-    fs.unlinkSync(ffmpegDownloadPath);
+    // Clean up the failed binary. On Windows, the download was moved (not copied) to ffmpegTempPath, so we delete that. On Unix, we delete the cached archive to allow a
+    // fresh download on the next attempt.
+    fs.unlinkSync((os.platform() === "win32") ? ffmpegTempPath : ffmpegDownloadPath);
 
     process.exit(0);
   }
@@ -510,6 +511,9 @@ async function install() {
   fs.renameSync(ffmpegTempPath, ffmpegTargetPath);
 
   console.log(CONSOLE_COLOR_CYAN + "\nFFmpeg has been downloaded to " + ffmpegTargetPath + "." + CONSOLE_COLOR_RESET);
+
+  // Explicitly exit to ensure the process terminates promptly. Without this, lingering handles from HTTPS requests or tar extraction can keep the event loop alive.
+  process.exit(0);
 }
 
 /**
@@ -525,10 +529,10 @@ async function bootstrap() {
   try {
 
     await install();
-  } catch (e) {
+  } catch(e) {
 
     // Check if the error is due to permission issues. This commonly happens when installing global npm packages without proper permissions.
-    if(e && e.code && e.code === "EACCES") {
+    if(e && e.code && (e.code === "EACCES")) {
 
       console.log("Unable to download FFmpeg.");
       console.log("If you are installing this plugin as a global module (-g), make sure you add the --unsafe-perm flag to the install command.");

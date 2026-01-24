@@ -1,6 +1,6 @@
 {
   "name": "ffmpeg-for-homebridge",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Static FFmpeg binaries for Homebridge camera plugins to support HomeKit video streaming (AAC-ELD and H.264) and hardware-accelerated transcoding (QSV, V4L2M2M, VideoToolbox).",
   "author": {
     "name": "The Homebridge Team",
@@ -39,6 +39,6 @@
     "videotoolbox"
   ],
   "dependencies": {
-    "tar": "^7.4.3"
+    "tar": "^7.5.6"
   }
 }
