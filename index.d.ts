@@ -1,1 +1,2 @@
-export declare const ffmpeg_for_homebridge: string | undefined;
+declare const ffmpegPath: string | undefined;
+export default ffmpegPath;
