@@ -1,5 +1,9 @@
 "use strict";
 
+/* Copyright(C) 2019-2026, The Homebridge Team. All rights reserved.
+ *
+ * index.js: Main entry point. Exports the path to the FFmpeg binary, or undefined if unavailable.
+ */
 const os = require("node:os");
 const path = require("node:path");
 const fs = require("node:fs");
