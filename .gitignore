@@ -6,3 +6,4 @@ ffmpeg
 *.tgz
 .DS_Store
 .build
+.idea
