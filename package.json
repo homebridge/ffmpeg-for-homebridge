@@ -39,6 +39,6 @@
     "videotoolbox"
   ],
   "dependencies": {
-    "tar": "^7.5.12"
+    "tar": "^7.5.20"
   }
 }
