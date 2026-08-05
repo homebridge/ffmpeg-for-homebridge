@@ -38,7 +38,10 @@ RUN if [ "${TARGETPLATFORM}" = "${BUILDPLATFORM}" ]; then rm -f /usr/bin/qemu-*-
 # Install our dependencies ahead of building our FFmpeg release.
 RUN apk add --no-cache autoconf automake bash cmake curl diffutils g++ gcc gettext-static giflib-static git lame-dev libogg-static libpng-dev libpng-static \
   libtheora-dev libtheora-static libtool libvorbis-dev libvorbis-static libwebp-dev libwebp-static linux-headers m4 make meson nasm opencore-amr-dev openssl-dev \
-  openssl-libs-static pcre-dev perl python3 samurai tar xvidcore-dev xvidcore-static xz yasm zlib-static
+  openssl-libs-static pcre-dev perl python3 samurai tar xvidcore-dev xvidcore-static xz yasm zlib-static \
+  brotli-dev brotli-static bzip2-dev bzip2-static expat-dev expat-static fontconfig-dev fontconfig-static \
+  freetype-dev freetype-static fribidi-dev fribidi-static graphite2-dev graphite2-static harfbuzz-dev \
+  harfbuzz-static libxml2-dev libxml2-static soxr-dev soxr-static xz-dev xz-static
 
 # Copy over our FFmpeg build script.
 COPY build-ffmpeg /build-ffmpeg
