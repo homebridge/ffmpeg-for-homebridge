@@ -171,12 +171,12 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "Caching workspace (Linux)."
         if: runner.os == 'Linux' && matrix.DOCKERFILE != 'windows'
         id: cache-linux
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: build
           key: ${{ matrix.name }}-${{ env.FFMPEG_VERSION }}-${{ hashFiles('build-ffmpeg', 'Dockerfile.linux') }}
@@ -184,7 +184,7 @@ jobs:
       - name: "Caching workspace (macOS)."
         if: runner.os == 'macOS'
         id: cache-macos
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: build
           key: ${{ matrix.name }}-${{ env.FFMPEG_VERSION }}-${{ hashFiles('build-ffmpeg', 'build-macOS.sh') }}
@@ -270,7 +270,7 @@ jobs:
 
       # Upload the packaged asset as an artifact.
       - name: "Uploading the packaged asset."
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ffmpeg-${{ matrix.name }}
           path: |
